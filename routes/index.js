@@ -1,4 +1,4 @@
-var models = require('../models');
+var models = require('../models/index.js');
 var express = require('express');
 var router = express.Router();
 
@@ -9,6 +9,7 @@ router.get('/', function(req, res, next) {
 
 /* GET new books page. */
 router.get('/new_book.html', function(req, res, next) {
+
   res.render('new_book', { title: 'SQLite Library Manager: New Book' });
 });
 
