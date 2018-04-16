@@ -30,6 +30,9 @@ router.get('/checked_books.html', function(req, res, next) {
 
 /* GET all loans page. */
 router.get('/all_loans.html', function(req, res, next) {
+
+  models.Loan.findAll().then((all) => console.log(all));
+  
   res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
 });
 
