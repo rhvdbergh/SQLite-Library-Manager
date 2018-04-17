@@ -32,10 +32,8 @@ router.get('/overdue_books.html', function(req, res, next) {
     .then((loans) =>
     {
       loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
-      // return book_ids;
     })
     .then(() => {
-      console.log('book ids', book_ids);
       models.Book.findAll( {where: { id: [...book_ids]}})
         .then((books) => res.render('overdue_books', { books: books  }))
     })
