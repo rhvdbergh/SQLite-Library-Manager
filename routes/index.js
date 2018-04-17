@@ -26,12 +26,19 @@ router.get('/all_books.html', function(req, res, next) {
 router.get('/overdue_books.html', function(req, res, next) {
   
   const today = new Date();
-  models.Loan.findAll( {where: { return_by: {[Op.gt]: today } }})
+  let book_ids =[];
+
+  models.Loan.findAll( {where: { return_by: {[Op.lt]: today } }})
     .then((loans) =>
     {
-      loans.forEach((loan) => console.log(loan.dataValues.book_id, loan.dataValues.return_by));
-      res.render('overdue_books', {   });
-    });
+      loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
+      // return book_ids;
+    })
+    .then(() => {
+      console.log('book ids', book_ids);
+      models.Book.findAll( {where: { id: [...book_ids]}})
+        .then((books) => res.render('overdue_books', { books: books  }))
+    })
 });
 
 /* GET checked books page. */
