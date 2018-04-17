@@ -28,7 +28,7 @@ router.get('/overdue_books.html', function(req, res, next) {
   const today = new Date();
   let book_ids =[];
 
-  models.Loan.findAll( {where: { return_by: {[Op.lt]: today } }})
+  models.Loan.findAll( {where: { return_by: {[Op.lt]: today }, returned_on: {[Op.eq]: null} }})
     .then((loans) =>
     {
       loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
