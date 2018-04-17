@@ -48,7 +48,25 @@ router.get('/overdue_books.html', function(req, res, next) {
 
 /* GET checked books page. */
 router.get('/checked_books.html', function(req, res, next) {
-  res.render('checked_books', {  });
+
+  let book_ids =[];
+  
+  models.Loan.findAll( 
+      { where: 
+        { loaned_on: {[Op.not]: null}, // test for empty cell
+        returned_on: null} 
+      })
+  .then((loans) =>
+  {
+    loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
+  })
+  .then(() => {
+    models.Book.findAll( 
+      {where: 
+        { id: [...book_ids]}
+      })
+      .then((books) => res.render('checked_books', { books: books  }))
+  })
 });
 
 /* GET all loans page. */
