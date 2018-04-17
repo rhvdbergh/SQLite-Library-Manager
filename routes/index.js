@@ -15,7 +15,9 @@ router.get('/new_book.html', function(req, res, next) {
 
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
-  res.render('all_books', { title: 'SQLite Library Manager: All Books' });
+  
+  models.Book.findAll()
+    .then((books) => res.render('all_books', { books: books }));
 });
 
 /* GET overdue books page. */
@@ -32,7 +34,7 @@ router.get('/checked_books.html', function(req, res, next) {
 router.get('/all_loans.html', function(req, res, next) {
 
   models.Loan.findAll().then((all) => console.log(all));
-  
+
   res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
 });
 
