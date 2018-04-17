@@ -28,20 +28,27 @@ router.get('/overdue_books.html', function(req, res, next) {
   const today = new Date();
   let book_ids =[];
 
-  models.Loan.findAll( {where: { return_by: {[Op.lt]: today }, returned_on: {[Op.eq]: null} }})
+  models.Loan.findAll( 
+      { where: 
+        { return_by: {[Op.lt]: today }, 
+        returned_on: {[Op.eq]: null} }
+      })
     .then((loans) =>
     {
       loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
     })
     .then(() => {
-      models.Book.findAll( {where: { id: [...book_ids]}})
+      models.Book.findAll( 
+        {where: 
+          { id: [...book_ids]}
+        })
         .then((books) => res.render('overdue_books', { books: books  }))
     })
 });
 
 /* GET checked books page. */
 router.get('/checked_books.html', function(req, res, next) {
-  res.render('checked_books', { title: 'SQLite Library Manager: Books Checked Out' });
+  res.render('checked_books', {  });
 });
 
 /* GET all loans page. */
