@@ -1,6 +1,8 @@
-var models = require('../models/index.js');
-var express = require('express');
-var router = express.Router();
+const models = require('../models/index.js');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const express = require('express');
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -15,14 +17,21 @@ router.get('/new_book.html', function(req, res, next) {
 
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
-  
+
   models.Book.findAll()
     .then((books) => res.render('all_books', { books: books }));
 });
 
 /* GET overdue books page. */
 router.get('/overdue_books.html', function(req, res, next) {
-  res.render('overdue_books', { title: 'SQLite Library Manager: Overdue Books' });
+  
+  const today = new Date();
+  models.Loan.findAll( {where: { return_by: {[Op.gt]: today } }})
+    .then((loans) =>
+    {
+      loans.forEach((loan) => console.log(loan.dataValues.book_id, loan.dataValues.return_by));
+      res.render('overdue_books', {   });
+    });
 });
 
 /* GET checked books page. */
@@ -32,9 +41,6 @@ router.get('/checked_books.html', function(req, res, next) {
 
 /* GET all loans page. */
 router.get('/all_loans.html', function(req, res, next) {
-
-  models.Loan.findAll().then((all) => console.log(all));
-
   res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
 });
 
