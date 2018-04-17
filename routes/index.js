@@ -76,7 +76,9 @@ router.get('/all_loans.html', function(req, res, next) {
 
 /* GET all patrons page. */
 router.get('/all_patrons.html', function(req, res, next) {
-  res.render('all_patrons', { title: 'SQLite Library Manager: All Patrons' });
+
+  models.Patron.findAll()
+  .then((patrons) => res.render('all_patrons', { patrons: patrons }));
 });
 
 /* GET new patrons page. */
