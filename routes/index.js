@@ -3,16 +3,25 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const express = require('express');
 const router = express.Router();
+const { Book, Loan, Patron } = require('../models/index.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'SQLite Library Manager' });
+  res.render('index', { });
 });
 
 /* GET new books page. */
 router.get('/new_book.html', function(req, res, next) {
 
-  res.render('new_book', { title: 'SQLite Library Manager: New Book' });
+  res.render('new_book', { books: Book.build() });
+});
+
+router.post('/new_book.html', function(req, res, next) {
+
+  console.log('req.body', req.body);
+  Book.create(req.body);
+
+  res.redirect('all_books.html');
 });
 
 /* GET all books page. */
