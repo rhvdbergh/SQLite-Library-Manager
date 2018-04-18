@@ -2,6 +2,10 @@ extends layout
 
 block content
   h1 New Patron
+  if (errors)
+    h2.error Validation error!
+      each error in errors
+        h3.error= error.message
   form(method='post')
     p
       label(for='first_name') First Name
