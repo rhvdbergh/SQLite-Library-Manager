@@ -18,13 +18,14 @@ router.get('/new_book.html', function(req, res, next) {
 
 router.post('/new_book.html', function(req, res, next) {
 
-  console.log('req.body', req.body);
   Book.create(req.body)
     .then(() => {
       res.redirect('all_books.html');
     })
     .catch((error) => {
       if (error.name === "SequelizeValidationError") {
+        req.body.first_published = null;
+        if(req.body.first_published === null) {console.log('req.body.first_published is null')};
         res.render('new_book', { book: Book.build(req.body), errors: error.errors });
       } else { throw error; }
     });
