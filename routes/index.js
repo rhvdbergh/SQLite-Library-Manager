@@ -24,8 +24,6 @@ router.post('/new_book.html', function(req, res, next) {
     })
     .catch((error) => {
       if (error.name === "SequelizeValidationError") {
-        req.body.first_published = null;
-        if(req.body.first_published === null) {console.log('req.body.first_published is null')};
         res.render('new_book', { book: Book.build(req.body), errors: error.errors });
       } else { throw error; }
     }).catch((error) => console.log('error', error));
@@ -100,7 +98,23 @@ router.get('/all_patrons.html', function(req, res, next) {
 
 /* GET new patrons page. */
 router.get('/new_patron.html', function(req, res, next) {
-  res.render('new_patron', { title: 'SQLite Library Manager: New Patron' });
+
+  res.render('new_patron', { patron: Patron.build() });
+});
+
+/* POST new patrons info */
+router.post('/new_patron.html', function(req, res, next) {
+
+  Patron.create(req.body)
+    .then(() => {
+      res.redirect('all_patrons.html');
+    })
+    .catch((error) => {
+      if (error.name === "SequelizeValidationError") {
+        res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
+      } else { throw error; }
+    }).catch((error) => console.log('error', error));
+  
 });
 
 /* GET new loans page. */
