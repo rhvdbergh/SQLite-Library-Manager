@@ -28,7 +28,7 @@ router.post('/new_book.html', function(req, res, next) {
         if(req.body.first_published === null) {console.log('req.body.first_published is null')};
         res.render('new_book', { book: Book.build(req.body), errors: error.errors });
       } else { throw error; }
-    });
+    }).catch((error) => console.log('error', error));
   
 });
 
