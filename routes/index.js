@@ -27,7 +27,7 @@ router.post('/new_book.html', function(req, res, next) {
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
 
-  models.Book.findAll()
+  Book.findAll()
     .then((books) => res.render('all_books', { books: books }));
 });
 
@@ -37,7 +37,7 @@ router.get('/overdue_books.html', function(req, res, next) {
   const today = new Date();
   let book_ids =[];
 
-  models.Loan.findAll( 
+  Loan.findAll( 
       { where: 
         { return_by: {[Op.lt]: today }, 
         returned_on: {[Op.eq]: null} }
@@ -47,7 +47,7 @@ router.get('/overdue_books.html', function(req, res, next) {
       loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
     })
     .then(() => {
-      models.Book.findAll( 
+      Book.findAll( 
         {where: 
           { id: [...book_ids]}
         })
@@ -60,7 +60,7 @@ router.get('/checked_books.html', function(req, res, next) {
 
   let book_ids =[];
   
-  models.Loan.findAll( 
+  Loan.findAll( 
       { where: 
         { loaned_on: {[Op.not]: null}, // test for empty cell
         returned_on: null} 
@@ -70,7 +70,7 @@ router.get('/checked_books.html', function(req, res, next) {
     loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
   })
   .then(() => {
-    models.Book.findAll( 
+    Book.findAll( 
       {where: 
         { id: [...book_ids]}
       })
@@ -86,7 +86,7 @@ router.get('/all_loans.html', function(req, res, next) {
 /* GET all patrons page. */
 router.get('/all_patrons.html', function(req, res, next) {
 
-  models.Patron.findAll()
+  Patron.findAll()
   .then((patrons) => res.render('all_patrons', { patrons: patrons }));
 });
 
