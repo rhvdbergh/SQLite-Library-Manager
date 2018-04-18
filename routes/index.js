@@ -13,15 +13,22 @@ router.get('/', function(req, res, next) {
 /* GET new books page. */
 router.get('/new_book.html', function(req, res, next) {
 
-  res.render('new_book', { books: Book.build() });
+  res.render('new_book', { book: Book.build() });
 });
 
 router.post('/new_book.html', function(req, res, next) {
 
   console.log('req.body', req.body);
-  Book.create(req.body);
-
-  res.redirect('all_books.html');
+  Book.create(req.body)
+    .then(() => {
+      res.redirect('all_books.html');
+    })
+    .catch((error) => {
+      if (error.name === "SequelizeValidationError") {
+        res.render('new_book', { book: Book.build(req.body), errors: error.errors });
+      } else { throw error; }
+    });
+  
 });
 
 /* GET all books page. */
