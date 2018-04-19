@@ -1,4 +1,7 @@
 'use strict';
+
+
+
 module.exports = (sequelize, DataTypes) => {
   var Book = sequelize.define('Book', {
     title: { 
@@ -24,9 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     } 
     }
-  }, {timestamps: false});
+  }, {timestamps: false, underscored: true});
   Book.associate = function(models) {
     // associations can be defined here
+    // Book.belongsTo(models.Loan);
   };
   return Book;
 };

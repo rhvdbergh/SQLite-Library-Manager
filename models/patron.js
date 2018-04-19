@@ -32,9 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         msg: "Please enter a zip code consisting of 5 digits"
       }}
     }
-  }, {timestamps: false});
+  }, {timestamps: false, underscored: true});
   Patron.associate = function(models) {
     // associations can be defined here
+    // Patron.belongsTo(models.Loan);
   };
   return Patron;
 };
