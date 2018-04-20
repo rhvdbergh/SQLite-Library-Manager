@@ -134,7 +134,7 @@ router.get('/new_loan.html', function(req, res, next) {
 
   Book.findAll()
     .then((books) => {
-      if (books.length > 0) { // check to see if there actually are books in the database
+      if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
         Patron.findAll()
           .then((patrons) => {
             if (patrons.length > 0) {
@@ -146,11 +146,11 @@ router.get('/new_loan.html', function(req, res, next) {
                 return_date: returnDate }
               )
             } else { // there are no patrons!
-              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a loan.'});        
+              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
             }
           })
-      } else { // there are no books!
-        res.render('error_message', { message: 'There are no books in the library database. Please enter a book before taking out a loan.'});
+      } else { // there are no books that are available to check out!
+        res.render('error_message', { message: 'There are no books that are available to check out in the library database. Please return book or enter a new book before taking the book out.'});
       }
     });
 });
