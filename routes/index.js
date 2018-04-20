@@ -139,6 +139,20 @@ router.get('/new_loan.html', function(req, res, next) {
     );
 });
 
+/* POST new loan info */
+router.post('/new_loan.html', function(req, res, next) {
+
+  Loan.create(req.body)
+    .then(() => {
+      res.redirect('/');
+    })
+    .catch((error) => {
+      if (error.name === "SequelizeValidationError") {
+        res.render('new_loan', { loan: Loan.build(req.body), errors: error.errors });
+      } else { throw error; }
+    }).catch((error) => console.log('error', error));
+});
+
 /* GET overdue loans page. */
 router.get('/overdue_loans.html', function(req, res, next) {
   res.render('overdue_loans', { title: 'SQLite Library Manager: Overdue Loans' });
