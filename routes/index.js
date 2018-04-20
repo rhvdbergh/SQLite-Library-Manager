@@ -126,17 +126,26 @@ router.get('/new_loan.html', function(req, res, next) {
   returnDate.setDate(returnDate.getDate() + 7);
 
   Book.findAll()
-    .then((books) => 
-      Patron.findAll()
-        .then((patrons) =>
-          res.render('new_loan', { 
-            loan: Loan.build(), 
-            books: books, 
-            patrons: patrons, 
-            today: today,
-            return_date: returnDate }
-        ))
-    );
+    .then((books) => {
+      if (books.length > 0) { // check to see if there actually are books in the database
+        Patron.findAll()
+          .then((patrons) => {
+            if (patrons.length > 0) {
+              res.render('new_loan', { 
+                loan: Loan.build(), 
+                books: books, 
+                patrons: patrons, 
+                today: today,
+                return_date: returnDate }
+              )
+            } else { // there are no patrons!
+              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a loan.'});        
+            }
+          })
+      } else { // there are no books!
+        res.render('error_message', { message: 'There are no books in the library database. Please enter a book before taking out a loan.'});
+      }
+    });
 });
 
 /* POST new loan info */
