@@ -5,6 +5,11 @@ const express = require('express');
 const router = express.Router();
 const { Book, Loan, Patron } = require('../models/index.js');
 
+// returns date object in the form yyyy-mm-dd
+function formatDate(date) {
+  return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+}
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { });
@@ -121,9 +126,11 @@ router.post('/new_patron.html', function(req, res, next) {
 /* GET new loans page. */
 router.get('/new_loan.html', function(req, res, next) {
 
-  const today = new Date();
+  let today = new Date();
+  today = formatDate(today);
   let returnDate = new Date();
   returnDate.setDate(returnDate.getDate() + 7);
+  returnDate = formatDate(returnDate);
 
   Book.findAll()
     .then((books) => {
