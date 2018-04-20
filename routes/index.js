@@ -132,27 +132,41 @@ router.get('/new_loan.html', function(req, res, next) {
   returnDate.setDate(returnDate.getDate() + 7);
   returnDate = formatDate(returnDate);
 
-  Book.findAll()
+  let checked_out_books =[];
+
+  Loan.findAll( 
+      { where: 
+        { returned_on: null} // these are checked out books, not yet returned
+      })
+  .then((loans) =>
+  {
+    loans.forEach((loan) => checked_out_books.push(loan.dataValues.book_id));
+  })
+  .then(() => {
+    Book.findAll({where: 
+      { id: {[Op.notIn]: [...checked_out_books]}}
+      })
     .then((books) => {
       if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
         Patron.findAll()
-          .then((patrons) => {
-            if (patrons.length > 0) {
-              res.render('new_loan', { 
-                loan: Loan.build(), 
-                books: books, 
-                patrons: patrons, 
-                today: today,
-                return_date: returnDate }
-              )
-            } else { // there are no patrons!
-              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
-            }
-          })
+        .then((patrons) => {
+          if (patrons.length > 0) {
+            res.render('new_loan', { 
+              loan: Loan.build(), 
+              books: books, 
+              patrons: patrons, 
+              today: today,
+              return_date: returnDate }
+            )
+          } else { // there are no patrons!
+            res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
+          }
+        })
       } else { // there are no books that are available to check out!
-        res.render('error_message', { message: 'There are no books that are available to check out in the library database. Please return book or enter a new book before taking the book out.'});
+        res.render('error_message', { message: 'There are no books that are available to check out in the library database.'});
       }
-    });
+    })
+  })  
 });
 
 /* POST new loan info */

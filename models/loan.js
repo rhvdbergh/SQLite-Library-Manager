@@ -2,8 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   var Loan = sequelize.define('Loan', {
     book_id: {
-      type: DataTypes.INTEGER,
-      unique: true
+      type: DataTypes.INTEGER
     },
     patron_id: {
       type:DataTypes.INTEGER
