@@ -125,9 +125,6 @@ router.get('/new_loan.html', function(req, res, next) {
   let returnDate = new Date();
   returnDate.setDate(returnDate.getDate() + 7);
 
-  console.log('returndate', returnDate);
-  console.log('today', today);
-
   Book.findAll()
     .then((books) => 
       Patron.findAll()
