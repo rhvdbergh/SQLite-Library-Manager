@@ -6,8 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     patron_id: {
-      type:DataTypes.INTEGER,
-      unique: true
+      type:DataTypes.INTEGER
     },
       loaned_on: DataTypes.DATE,
     return_by: DataTypes.DATE,
