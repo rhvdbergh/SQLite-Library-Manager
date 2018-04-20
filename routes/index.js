@@ -16,6 +16,7 @@ router.get('/new_book.html', function(req, res, next) {
   res.render('new_book', { book: Book.build() });
 });
 
+/* POST new book. */
 router.post('/new_book.html', function(req, res, next) {
 
   Book.create(req.body)
@@ -119,7 +120,26 @@ router.post('/new_patron.html', function(req, res, next) {
 
 /* GET new loans page. */
 router.get('/new_loan.html', function(req, res, next) {
-  res.render('new_loan', { title: 'SQLite Library Manager: New Loan' });
+
+  const today = new Date();
+  let returnDate = new Date();
+  returnDate.setDate(returnDate.getDate() + 7);
+
+  console.log('returndate', returnDate);
+  console.log('today', today);
+
+  Book.findAll()
+    .then((books) => 
+      Patron.findAll()
+        .then((patrons) =>
+          res.render('new_loan', { 
+            loan: Loan.build(), 
+            books: books, 
+            patrons: patrons, 
+            today: today,
+            return_date: returnDate }
+        ))
+    );
 });
 
 /* GET overdue loans page. */
