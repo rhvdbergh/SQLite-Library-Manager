@@ -54,7 +54,7 @@ router.post('/new_book.html', function(req, res, next) {
 router.get('/all_books.html', function(req, res, next) {
 
   Book.findAll()
-    .then((books) => res.render('all_books', { books: books }));
+    .then((books) => res.render('all_books', { books: books, title: "All Books" }));
 });
 
 /* GET overdue books page. */
@@ -77,7 +77,7 @@ router.get('/overdue_books.html', function(req, res, next) {
         {where: 
           { id: [...book_ids]}
         })
-        .then((books) => res.render('overdue_books', { books: books  }))
+        .then((books) => res.render('overdue_books', { books: books, title: 'Overdue Books'  }))
     })
 });
 
@@ -100,7 +100,7 @@ router.get('/checked_books.html', function(req, res, next) {
       {where: 
         { id: [...book_ids]}
       })
-      .then((books) => res.render('checked_books', { books: books  }))
+      .then((books) => res.render('checked_books', { books: books, title: 'Books Checked Out'  }))
   })
 });
 
