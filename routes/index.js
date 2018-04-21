@@ -265,16 +265,41 @@ router.get('/overdue_loans.html', function(req, res, next) {
       }
   
     });
-    res.render('all_loans', { loans: formattedLoans, title: 'Overdue Loans' })
+    res.render('overdue_loans', { loans: formattedLoans, title: 'Overdue Loans' })
   });
-
-
-  // res.render('overdue_loans', { title: 'Overdue Loans' });
 });
 
 /* GET checked loans page. */
 router.get('/checked_loans.html', function(req, res, next) {
-  res.render('checked_loans', { title: 'SQLite Library Manager: Checked Out Books' });
+
+  Loan.findAll( 
+    { where: 
+      { loaned_on: {[Op.not]: null}, // test for empty cell
+      returned_on: null}, 
+      include: [
+        {
+          model: Book
+        },
+        {
+          model: Patron
+        }
+    ]})
+  .then((loans) => {
+    const formattedLoans = loans.map((loan) => {
+      return {
+        book_title: loan.dataValues.Book.dataValues.title,
+        patron: loan.dataValues.Patron.dataValues.first_name + loan.dataValues.Patron.dataValues.last_name,
+        book_id: loan.dataValues.book_id,
+        patron_id: loan.dataValues.patron_id,
+        loaned_on: formatDate(loan.dataValues.loaned_on),
+        return_by: formatDate(loan.dataValues.return_by),
+        returned_on: formatDate(loan.dataValues.returned_on)
+      }
+    });
+    res.render('checked_loans', { loans: formattedLoans, title: 'Checked Out Books' })
+  });
+
+  // res.render('checked_loans', { title: 'SQLite Library Manager: Checked Out Books' });
 });
 
 
