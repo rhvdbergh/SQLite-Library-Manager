@@ -219,7 +219,7 @@ router.get('/all_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: loan.dataValues.Patron.dataValues.first_name + loan.dataValues.Patron.dataValues.last_name,
+        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
@@ -255,7 +255,7 @@ router.get('/overdue_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: loan.dataValues.Patron.dataValues.first_name + loan.dataValues.Patron.dataValues.last_name,
+        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
@@ -286,7 +286,7 @@ router.get('/checked_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: loan.dataValues.Patron.dataValues.first_name + loan.dataValues.Patron.dataValues.last_name,
+        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
