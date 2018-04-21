@@ -3,23 +3,4 @@ extends layout
 block content
   include book_form.pug
   h2 Loan History
-  table
-    thead
-      tr
-        th Book
-        th Patron
-        th Loaned on
-        th Return by
-        th Returned on
-        th Action
-    tbody
-      tr
-        td
-          a(href='book_detail.html') A Brief History of Time
-        td
-          a(href='patron_detail.html') Andrew Chalkley
-        td 2015-12-12
-        td 2015-12-19
-        td
-        td
-          a.button(href='return_book.html') Return Book
+  include loan_table.pug

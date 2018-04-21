@@ -106,9 +106,32 @@ router.get('/checked_books.html', function(req, res, next) {
 
 /* GET edit book page. */
 router.get('/book/:id', function(req, res, next) {
-  Book.findById(req.params.id)
-  .then((book) => {
-    res.render('book_detail', { book: book, title: book.dataValues.title, button_message: 'Update' })
+  
+  Loan.findAll({
+      where: 
+    {book_id: req.params.id},
+    include: [
+      {
+        model: Book
+      },
+      {
+        model: Patron
+      }]
+    })
+  .then((loans) => {
+    const formattedLoans = loans.map((loan) => {
+      return {
+        book: loan.dataValues.Book,
+        book_title: loan.dataValues.Book.dataValues.title,
+        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        book_id: loan.dataValues.book_id,
+        patron_id: loan.dataValues.patron_id,
+        loaned_on: formatDate(loan.dataValues.loaned_on),
+        return_by: formatDate(loan.dataValues.return_by),
+        returned_on: formatDate(loan.dataValues.returned_on)
+      }
+    });
+    res.render('book_detail', { loans: formattedLoans, book: formattedLoans[0].book, title: formattedLoans[0].book.dataValues.title, button_message: 'Update' })
   });
 });
 
