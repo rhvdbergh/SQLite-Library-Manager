@@ -24,7 +24,7 @@ block content
       each loan in loans
         tr
           td
-            a(href='book_detail.html') #{loan.dataValues.book_id}
+            a(href='book_detail.html') #{loan.dataValues.Book.dataValues.title}
           td
             a(href='patron_detail.html') #{loan.dataValues.patron_id}
           td= loan.dataValues.loaned_on

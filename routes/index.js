@@ -188,7 +188,9 @@ router.get('/new_loan.html', function(req, res, next) {
 router.post('/new_loan.html', function(req, res, next) {
   
   Loan.create(req.body)
-  .then(() => {
+  .then((loan) => {
+    loan.setBook(req.body.book_id);
+    loan.setPatron(req.body.patron_id);
     res.redirect('/');
   })
   .catch((error) => {
@@ -201,11 +203,20 @@ router.post('/new_loan.html', function(req, res, next) {
 /* GET all loans page. */
 router.get('/all_loans.html', function(req, res, next) {
 
-  Loan.findAll()
-  .then((loans) => res.render('all_loans', { loans: loans }));
-
-  
+  Loan.findAll({
+    include: [
+      {
+        model: Book
+      }
+    ]
+  })
+  .then((loans) => {
+    res.render('all_loans', { loans: loans })
+  });
+      
 });
+
+
 
 /* GET overdue loans page. */
 router.get('/overdue_loans.html', function(req, res, next) {
