@@ -24,12 +24,12 @@ block content
       each loan in loans
         tr
           td
-            a(href='book_detail.html') #{loan.dataValues.Book.dataValues.title}
+            a(href='book_detail.html') #{loan.book_title}
           td
-            a(href='patron_detail.html') #{loan.dataValues.Patron.dataValues.first_name} #{loan.dataValues.Patron.dataValues.last_name}
-          td= loan.dataValues.loaned_on
-          td= loan.dataValues.return_by
-          td= loan.dataValues.returned_on
+            a(href='patron_detail.html') #{loan.patron}
+          td= loan.loaned_on
+          td= loan.return_by
+          td= loan.returned_on
           td
             if loan.returned_on === null
               a.button(href='return_book.html') Return Book

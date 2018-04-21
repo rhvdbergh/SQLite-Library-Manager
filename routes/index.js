@@ -11,7 +11,9 @@ const { Book, Loan, Patron } = require('../models/index.js');
 
 // returns date object in the form yyyy-mm-dd
 function formatDate(date) {
-  return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  if (date) {
+    return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  } else return null;
 }
 
 ////////////////////////////////
@@ -214,7 +216,19 @@ router.get('/all_loans.html', function(req, res, next) {
     ]
   })
   .then((loans) => {
-    res.render('all_loans', { loans: loans })
+    const formattedLoans = loans.map((loan) => {
+      return {
+        book_title: loan.dataValues.Book.dataValues.title,
+        patron: loan.dataValues.Patron.dataValues.first_name + loan.dataValues.Patron.dataValues.last_name,
+        book_id: loan.dataValues.book_id,
+        patron_id: loan.dataValues.patron_id,
+        loaned_on: formatDate(loan.dataValues.loaned_on),
+        return_by: formatDate(loan.dataValues.return_by),
+        returned_on: formatDate(loan.dataValues.returned_on)
+      }
+
+    });
+    res.render('all_loans', { loans: formattedLoans })
   });
       
 });
