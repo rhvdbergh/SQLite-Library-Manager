@@ -32,7 +32,7 @@ router.get('/', function(req, res, next) {
 /* GET new books page. */
 router.get('/new_book.html', function(req, res, next) {
 
-  res.render('new_book', { book: Book.build() });
+  res.render('new_book', { book: Book.build(), title: 'New Book', button_message: 'Create New Book' });
 });
 
 /* POST new book. */
@@ -102,6 +102,14 @@ router.get('/checked_books.html', function(req, res, next) {
       })
       .then((books) => res.render('checked_books', { books: books, title: 'Books Checked Out'  }))
   })
+});
+
+/* GET edit book page. */
+router.get('/book/:id', function(req, res, next) {
+  Book.findById(req.params.id)
+  .then((book) => {
+    res.render('book_detail', { book: book, title: book.dataValues.title, button_message: 'Update' })
+  });
 });
 
 ////////////////////////////////
