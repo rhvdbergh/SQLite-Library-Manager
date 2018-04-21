@@ -207,6 +207,9 @@ router.get('/all_loans.html', function(req, res, next) {
     include: [
       {
         model: Book
+      },
+      {
+        model: Patron
       }
     ]
   })

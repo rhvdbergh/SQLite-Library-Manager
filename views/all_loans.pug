@@ -26,7 +26,7 @@ block content
           td
             a(href='book_detail.html') #{loan.dataValues.Book.dataValues.title}
           td
-            a(href='patron_detail.html') #{loan.dataValues.patron_id}
+            a(href='patron_detail.html') #{loan.dataValues.Patron.dataValues.first_name} #{loan.dataValues.Patron.dataValues.last_name}
           td= loan.dataValues.loaned_on
           td= loan.dataValues.return_by
           td= loan.dataValues.returned_on
