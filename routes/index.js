@@ -135,6 +135,16 @@ router.get('/book/:id', function(req, res, next) {
   });
 });
 
+/* POST edit book page. */
+router.post('/book/:id', function(req, res, next) {
+  Book.findById(req.params.id) 
+  .then((book) => {
+    book.update(req.body)
+  })
+  .then(() => res.redirect('/'));
+});
+ 
+
 ////////////////////////////////
 //           PATRON           //
 ////////////////////////////////
