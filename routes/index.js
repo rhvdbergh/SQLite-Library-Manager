@@ -5,15 +5,27 @@ const express = require('express');
 const router = express.Router();
 const { Book, Loan, Patron } = require('../models/index.js');
 
+////////////////////////////////
+//       HELPER METHODS       //
+////////////////////////////////
+
 // returns date object in the form yyyy-mm-dd
 function formatDate(date) {
   return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 }
 
+////////////////////////////////
+//         HOME PAGE          //
+////////////////////////////////
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { });
 });
+
+////////////////////////////////
+//           BOOKS            //
+////////////////////////////////
 
 /* GET new books page. */
 router.get('/new_book.html', function(req, res, next) {
@@ -90,97 +102,105 @@ router.get('/checked_books.html', function(req, res, next) {
   })
 });
 
-/* GET all loans page. */
-router.get('/all_loans.html', function(req, res, next) {
-  res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
-});
+////////////////////////////////
+//           PATRON           //
+////////////////////////////////
 
 /* GET all patrons page. */
 router.get('/all_patrons.html', function(req, res, next) {
-
+  
   Patron.findAll()
   .then((patrons) => res.render('all_patrons', { patrons: patrons }));
 });
 
 /* GET new patrons page. */
 router.get('/new_patron.html', function(req, res, next) {
-
+  
   res.render('new_patron', { patron: Patron.build() });
 });
 
 /* POST new patrons info */
 router.post('/new_patron.html', function(req, res, next) {
-
+  
   Patron.create(req.body)
-    .then(() => {
-      res.redirect('all_patrons.html');
-    })
-    .catch((error) => {
-      if (error.name === "SequelizeValidationError") {
-        res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
-      } else { throw error; }
-    }).catch((error) => console.log('error', error));
+  .then(() => {
+    res.redirect('all_patrons.html');
+  })
+  .catch((error) => {
+    if (error.name === "SequelizeValidationError") {
+      res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
+    } else { throw error; }
+  }).catch((error) => console.log('error', error));
   
 });
 
+////////////////////////////////
+//            LOANS           //
+////////////////////////////////
+
 /* GET new loans page. */
 router.get('/new_loan.html', function(req, res, next) {
-
+  
   let today = new Date();
   today = formatDate(today);
   let returnDate = new Date();
   returnDate.setDate(returnDate.getDate() + 7);
   returnDate = formatDate(returnDate);
-
+  
   let checked_out_books =[];
-
+  
   Loan.findAll( 
-      { where: 
-        { returned_on: null} // these are checked out books, not yet returned
+    { where: 
+      { returned_on: null} // these are checked out books, not yet returned
+    })
+    .then((loans) =>
+    {
+      loans.forEach((loan) => checked_out_books.push(loan.dataValues.book_id));
+    })
+    .then(() => {
+      Book.findAll({where: 
+        { id: {[Op.notIn]: [...checked_out_books]}}
       })
-  .then((loans) =>
-  {
-    loans.forEach((loan) => checked_out_books.push(loan.dataValues.book_id));
-  })
-  .then(() => {
-    Book.findAll({where: 
-      { id: {[Op.notIn]: [...checked_out_books]}}
-      })
-    .then((books) => {
-      if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
-        Patron.findAll()
-        .then((patrons) => {
-          if (patrons.length > 0) {
-            res.render('new_loan', { 
-              loan: Loan.build(), 
-              books: books, 
-              patrons: patrons, 
-              today: today,
-              return_date: returnDate }
-            )
-          } else { // there are no patrons!
-            res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
-          }
-        })
-      } else { // there are no books that are available to check out!
-        res.render('error_message', { message: 'There are no books that are available to check out in the library database.'});
-      }
+      .then((books) => {
+        if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
+          Patron.findAll()
+          .then((patrons) => {
+            if (patrons.length > 0) {
+              res.render('new_loan', { 
+                loan: Loan.build(), 
+                books: books, 
+                patrons: patrons, 
+                today: today,
+                return_date: returnDate }
+              )
+            } else { // there are no patrons!
+              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
+            }
+          })
+        } else { // there are no books that are available to check out!
+          res.render('error_message', { message: 'There are no books that are available to check out in the library database.'});
+        }
     })
   })  
 });
 
 /* POST new loan info */
 router.post('/new_loan.html', function(req, res, next) {
-
+  
   Loan.create(req.body)
-    .then(() => {
-      res.redirect('/');
-    })
-    .catch((error) => {
-      if (error.name === "SequelizeValidationError") {
-        res.render('new_loan', { loan: Loan.build(req.body), errors: error.errors });
-      } else { throw error; }
-    }).catch((error) => console.log('error', error));
+  .then(() => {
+    res.redirect('/');
+  })
+  .catch((error) => {
+    if (error.name === "SequelizeValidationError") {
+      res.render('new_loan', { loan: Loan.build(req.body), errors: error.errors });
+    } else { throw error; }
+  }).catch((error) => console.log('error', error));
+});
+
+/* GET all loans page. */
+router.get('/all_loans.html', function(req, res, next) {
+  res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
 });
 
 /* GET overdue loans page. */
