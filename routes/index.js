@@ -176,6 +176,26 @@ router.get('/return/:id', function(req, res, next) {
     });
 });
 
+/* POST return book page. */
+router.post('/return/:id', function(req, res, next) { 
+
+  Loan.findAll({
+    where: 
+      { book_id: req.params.id,
+        returned_on: {[Op.eq]: null} }
+  })
+  .then((loan) => {
+    const date = req.body.returned_on; 
+    // because r.b.returned_on is returned as a string in the format yyyy-mm-dd 
+    // we have to create a new Date -- otherwise date displays wrong in SQL
+    // because it is based on time zone 
+    console.log('********************************', date.substring(0,4), date.substring(5, 7), date.substring(8, 10));
+    const returned_on = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
+    loan[0].updateAttributes({returned_on: returned_on });
+  })
+  .then(() => res.redirect('/'));
+});
+
 ////////////////////////////////
 //           PATRON           //
 ////////////////////////////////
