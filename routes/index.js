@@ -200,7 +200,11 @@ router.post('/new_loan.html', function(req, res, next) {
 
 /* GET all loans page. */
 router.get('/all_loans.html', function(req, res, next) {
-  res.render('all_loans', { title: 'SQLite Library Manager: All Loans' });
+
+  Loan.findAll()
+  .then((loans) => res.render('all_loans', { loans: loans }));
+
+  
 });
 
 /* GET overdue loans page. */
