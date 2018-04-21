@@ -230,7 +230,6 @@ router.get('/all_loans.html', function(req, res, next) {
     });
     res.render('all_loans', { loans: formattedLoans, title: 'All Loans' })
   });
-      
 });
 
 /* GET overdue loans page. */
@@ -263,7 +262,6 @@ router.get('/overdue_loans.html', function(req, res, next) {
         return_by: formatDate(loan.dataValues.return_by),
         returned_on: formatDate(loan.dataValues.returned_on)
       }
-  
     });
     res.render('overdue_loans', { loans: formattedLoans, title: 'Overdue Loans' })
   });
@@ -298,9 +296,6 @@ router.get('/checked_loans.html', function(req, res, next) {
     });
     res.render('checked_loans', { loans: formattedLoans, title: 'Checked Out Books' })
   });
-
-  // res.render('checked_loans', { title: 'SQLite Library Manager: Checked Out Books' });
 });
-
 
 module.exports = router;
