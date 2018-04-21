@@ -4,19 +4,19 @@ block content
     h1 Patron: Return Book
     p
       strong Book Title:
-      | Harry Potter and the Goblet of Fire
+      | #{loan.book_title}
     p
       strong Loaned By:
-      | Andrew Chalkley
+      | #{loan.patron}
     p
       strong Loaned On:
-      | 2015-12-11
+      | #{loan.loaned_on}
     p
       strong Return By:
-      | 2015-12-18
-    form
+      | #{loan.return_by}
+    form(method='post')
       p
         label(for='returned_on') Returned on:
-        input#returned_on(type='text', value='2020-10-10')
+        input#returned_on(type='text', value=`${loan.today}`, name="returned_on")
       p
         input(type='submit', value='Return Book')

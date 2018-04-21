@@ -143,6 +143,43 @@ router.post('/book/:id', function(req, res, next) {
   })
   .then(() => res.redirect('/'));
 });
+
+/* GET return book page. */
+router.get('/return/:id', function(req, res, next) { 
+
+  Loan.findAll({
+        where: 
+          { book_id: req.params.id,
+            returned_on: {[Op.eq]: null} },
+        include: [
+        {
+          model: Book
+        },
+        {
+          model: Patron
+        }]
+      })
+    .then((loans) => {
+      const formattedLoans = loans.map((loan) => {
+        return {
+          today: formatDate(new Date()),
+          book: loan.dataValues.Book,
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          book_id: loan.dataValues.book_id,
+          patron_id: loan.dataValues.patron_id,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by),
+          returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      })
+      return formattedLoans; // there should be only one, but if not, the first will be returned by [0]
+    })
+    .then((loan) => {
+      res.render('return_book', { loan: loan[0] })
+    });
+
+});
  
 
 ////////////////////////////////
@@ -174,7 +211,6 @@ router.post('/new_patron.html', function(req, res, next) {
       res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
     } else { throw error; }
   }).catch((error) => console.log('error', error));
-  
 });
 
 ////////////////////////////////

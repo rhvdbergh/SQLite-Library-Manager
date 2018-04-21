@@ -11,12 +11,12 @@ table
     each loan in loans
       tr
         td
-          a(href=`book/${loan.book_id}`) #{loan.book_title}
+          a(href=`/book/${loan.book_id}`) #{loan.book_title}
         td
-          a(href=`patron/${loan.patron_id}`) #{loan.patron}
+          a(href=`/patron/${loan.patron_id}`) #{loan.patron}
         td= loan.loaned_on
         td= loan.return_by
         td= loan.returned_on
         td
           if loan.returned_on === null
-            a.button(href=`return/${loan.book_id}`) Return Book
+            a.button(href=`/return/${loan.book_id}`) Return Book
