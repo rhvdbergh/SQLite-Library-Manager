@@ -224,20 +224,53 @@ router.get('/return/:id', function(req, res, next) {
 /* POST return book page. */
 router.post('/return/:id', function(req, res, next) { 
 
-  Loan.findAll({
-    where: 
-      { book_id: req.params.id,
-        returned_on: {[Op.eq]: null} }
-  })
-  .then((loan) => {
-    const date = req.body.returned_on; 
-    // because r.b.returned_on is returned as a string in the format yyyy-mm-dd 
-    // we have to create a new Date -- otherwise date displays wrong in SQL
-    // because it is based on time zone 
-    const returned_on = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
-    loan[0].updateAttributes({returned_on: returned_on });
-  })
-  .then(() => res.redirect('/'));
+  if (!isValidDate(req.body.returned_on)) {
+
+    const error = [{ message: 'Please enter a valid date for the "Returned on" field.'}];
+
+    Loan.findAll({
+      where: 
+        { book_id: req.params.id,
+          returned_on: {[Op.eq]: null} },
+      include: [
+      {
+        model: Book
+      },
+      {
+        model: Patron
+      }]
+    })
+    .then((loans) => {
+      const formattedLoans = loans.map((loan) => {
+        return {
+          today: formatDate(new Date()),
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by)
+        }
+      })
+      return formattedLoans; // there should be only one, but if not, the first will be returned by [0]
+    })
+    .then((loan) => {
+      res.render('return_book', { loan: loan[0], errors: error })
+    });
+  } else { // end returned_on error validation
+    Loan.findAll({
+      where: 
+        { book_id: req.params.id,
+          returned_on: {[Op.eq]: null} }
+    })
+    .then((loan) => {
+      const date = req.body.returned_on; 
+      // because r.b.returned_on is returned as a string in the format yyyy-mm-dd 
+      // we have to create a new Date -- otherwise date displays wrong in SQL
+      // because it is based on time zone 
+      const returned_on = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
+      loan[0].updateAttributes({returned_on: returned_on });
+    })
+    .then(() => res.redirect('/'));
+  } 
 });
 
 ////////////////////////////////

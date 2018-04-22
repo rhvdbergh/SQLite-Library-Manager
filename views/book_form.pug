@@ -1,8 +1,5 @@
 h1= title
-if (errors)
-  h2.error Validation error!
-    each error in errors
-      h3.error= error.message
+include validation_errors.pug
 form(method="post")
   p
     label(for='title') Title
