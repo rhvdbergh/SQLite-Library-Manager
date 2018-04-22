@@ -16,6 +16,22 @@ function formatDate(date) {
   } else return null;
 }
 
+// tests if the date is valid
+function isValidDate(date) {
+  // regEx tests for years between 1900-2199 (1900 in case of old entries)
+  let regEx = /^(19|20|21)\d\d-\d{2}-\d{2}$/; 
+  let year = date.substring(0,4);
+  let month = date.substring(5, 7);
+  let day = date.substring(8,10);
+ 
+  console.log(year, month, day);
+  
+  date.substring(5, 7)-1, date.substring(8, 10)
+
+  if (regEx.test(date)
+      && (true)) return true;
+}
+
 ////////////////////////////////
 //         HOME PAGE          //
 ////////////////////////////////
@@ -338,56 +354,53 @@ router.get('/new_loan.html', function(req, res, next) {
 /* POST new loan info */
 router.post('/new_loan.html', function(req, res, next) {
   
-  if (req.body.loaned_on === '' || req.body.loaned_on === null) {
+  if (!isValidDate(req.body.loaned_on)) { // not a valid date
     let error = [
       { message: 'Please enter a validate date for the "Loaned on" field.' }
     ];
     let today = new Date();
-  today = formatDate(today);
-  let returnDate = new Date();
-  returnDate.setDate(returnDate.getDate() + 7);
-  returnDate = formatDate(returnDate);
-  
-  let checked_out_books =[];
-  
-  Loan.findAll( 
-    { where: 
-      { returned_on: null} // these are checked out books, not yet returned
-    })
-    .then((loans) =>
-    {
-      loans.forEach((loan) => checked_out_books.push(loan.dataValues.book_id));
-    })
-    .then(() => {
-      Book.findAll({where: 
-        { id: {[Op.notIn]: [...checked_out_books]}}
-      })
-      .then((books) => {
-        if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
-          Patron.findAll()
-          .then((patrons) => {
-            if (patrons.length > 0) {
-              res.render('new_loan', { 
-                loan: Loan.build(), 
-                books: books, 
-                patrons: patrons, 
-                today: req.body.loaned_on, // keep the date submitted by the user
-                return_date: req.body.return_by,  // keep the date submitted by the user
-                errors: error }
-              )
-            } else { // there are no patrons!
-              res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
-            }
-          })
-        } else { // there are no books that are available to check out!
-          res.render('error_message', { message: 'There are no books that are available to check out in the library database.'});
-        }
-    })
-  });
-
-    // res.render('new_loan', { loan: Loan.build(req.body), errors: error.errors });
+    today = formatDate(today);
+    let returnDate = new Date();
+    returnDate.setDate(returnDate.getDate() + 7);
+    returnDate = formatDate(returnDate);
     
-  } else { // end error validation
+    let checked_out_books =[];
+  
+    Loan.findAll( 
+      { where: 
+        { returned_on: null} // these are checked out books, not yet returned
+      })
+      .then((loans) =>
+      {
+        loans.forEach((loan) => checked_out_books.push(loan.dataValues.book_id));
+      })
+      .then(() => {
+        Book.findAll({where: 
+          { id: {[Op.notIn]: [...checked_out_books]}}
+        })
+        .then((books) => {
+          if (books.length > 0) { // check to see if there actually are books that can be taken out in the database
+            Patron.findAll()
+            .then((patrons) => {
+              if (patrons.length > 0) {
+                res.render('new_loan', { 
+                  loan: Loan.build(), 
+                  books: books, 
+                  patrons: patrons, 
+                  today: req.body.loaned_on, // keep the date submitted by the user
+                  return_date: req.body.return_by,  // keep the date submitted by the user
+                  errors: error }
+                )
+              } else { // there are no patrons!
+                res.render('error_message', { message: 'There are no patrons in the library database. Please enter a patron before taking out a book.'});        
+              }
+            })
+          } else { // there are no books that are available to check out!
+            res.render('error_message', { message: 'There are no books that are available to check out in the library database.'});
+          }
+      })
+    });
+    } else { // end error validation
 
   Loan.create(req.body)
   .then((loan) => {
