@@ -195,41 +195,6 @@ router.post('/return/:id', function(req, res, next) {
   .then(() => res.redirect('/'));
 });
 
-/* GET edit patron page. */
-router.get('/patron/:id', function(req, res, next) {
-  
-  Loan.findAll({
-      where: { patron_id: req.params.id},
-      include: [
-        {
-          model: Book
-        },
-        {
-          model: Patron
-        }]
-      })
-  .then((loans) => {
-    console.log(loans);
-    const formattedLoans = loans.map((loan) => {
-       return {
-        patron: loan.dataValues.Patron,
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
-        }
-      }
-    )
-      return formattedLoans; 
-    })
-    .then((loans) => {
-      res.render('patron_detail', { loans: loans, patron: loans[0].patron, title: loans[0].patron_name, button_message: 'Update' })
-    });
-});
-
 ////////////////////////////////
 //           PATRON           //
 ////////////////////////////////
@@ -259,6 +224,50 @@ router.post('/new_patron.html', function(req, res, next) {
       res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
     } else { throw error; }
   }).catch((error) => console.log('error', error));
+});
+
+/* GET edit patron page. */
+router.get('/patron/:id', function(req, res, next) {
+  
+  Loan.findAll({
+      where: { patron_id: req.params.id},
+      include: [
+        {
+          model: Book
+        },
+        {
+          model: Patron
+        }]
+      })
+  .then((loans) => {
+    const formattedLoans = loans.map((loan) => {
+       return {
+        patron: loan.dataValues.Patron,
+        book_title: loan.dataValues.Book.dataValues.title,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        book_id: loan.dataValues.book_id,
+        patron_id: loan.dataValues.patron_id,
+        loaned_on: formatDate(loan.dataValues.loaned_on),
+        return_by: formatDate(loan.dataValues.return_by),
+        returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      }
+    )
+      return formattedLoans; 
+    })
+    .then((loans) => {
+      res.render('patron_detail', { loans: loans, patron: loans[0].patron, title: loans[0].patron_name, button_message: 'Update' })
+    });
+});
+
+/* POST edit patron page. */
+router.post('/patron/:id', function(req, res, next) { 
+
+  Patron.findById(req.params.id) 
+  .then((patron) => {
+    patron.update(req.body);
+  })
+  .then(() => res.redirect('/'));
 });
 
 ////////////////////////////////
