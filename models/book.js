@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: null,
       validate: {is: {
-        args: /(^(15|16|17|18|19|20)\d\d$)|^$/, // four number date within range 1500-2099 or empty string
-        msg: 'First published should either be empty or contain a date between 1500-2099'
+        args: /(^(15|16|17|18|19|20|21)\d\d$)|^$/, // four number date within range 1500-2199 or empty string
+        msg: 'First published should either be empty or contain a date between 1500-2199'
       }
     } 
     }
