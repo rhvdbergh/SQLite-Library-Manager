@@ -13,7 +13,7 @@ table
         td
           a(href=`/book/${loan.book_id}`) #{loan.book_title}
         td
-          a(href=`/patron/${loan.patron_id}`) #{loan.patron}
+          a(href=`/patron/${loan.patron_id}`) #{loan.patron_name}
         td= loan.loaned_on
         td= loan.return_by
         td= loan.returned_on

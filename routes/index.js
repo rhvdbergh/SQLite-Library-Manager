@@ -123,7 +123,7 @@ router.get('/book/:id', function(req, res, next) {
       return {
         book: loan.dataValues.Book,
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
@@ -164,7 +164,7 @@ router.get('/return/:id', function(req, res, next) {
         return {
           today: formatDate(new Date()),
           book_title: loan.dataValues.Book.dataValues.title,
-          patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
           loaned_on: formatDate(loan.dataValues.loaned_on),
           return_by: formatDate(loan.dataValues.return_by),
         }
@@ -195,6 +195,41 @@ router.post('/return/:id', function(req, res, next) {
   .then(() => res.redirect('/'));
 });
 
+/* GET edit patron page. */
+router.get('/patron/:id', function(req, res, next) {
+  
+  Loan.findAll({
+      where: { patron_id: req.params.id},
+      include: [
+        {
+          model: Book
+        },
+        {
+          model: Patron
+        }]
+      })
+  .then((loans) => {
+    console.log(loans);
+    const formattedLoans = loans.map((loan) => {
+       return {
+        patron: loan.dataValues.Patron,
+        book_title: loan.dataValues.Book.dataValues.title,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        book_id: loan.dataValues.book_id,
+        patron_id: loan.dataValues.patron_id,
+        loaned_on: formatDate(loan.dataValues.loaned_on),
+        return_by: formatDate(loan.dataValues.return_by),
+        returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      }
+    )
+      return formattedLoans; 
+    })
+    .then((loans) => {
+      res.render('patron_detail', { loans: loans, patron: loans[0].patron, title: loans[0].patron_name, button_message: 'Update' })
+    });
+});
+
 ////////////////////////////////
 //           PATRON           //
 ////////////////////////////////
@@ -209,7 +244,7 @@ router.get('/all_patrons.html', function(req, res, next) {
 /* GET new patrons page. */
 router.get('/new_patron.html', function(req, res, next) {
   
-  res.render('new_patron', { patron: Patron.build() });
+  res.render('new_patron', { patron: Patron.build(), title: 'New Patron', button_message: 'Create New Patron' });
 });
 
 /* POST new patrons info */
@@ -309,7 +344,7 @@ router.get('/all_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
@@ -345,7 +380,7 @@ router.get('/overdue_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
@@ -376,7 +411,7 @@ router.get('/checked_loans.html', function(req, res, next) {
     const formattedLoans = loans.map((loan) => {
       return {
         book_title: loan.dataValues.Book.dataValues.title,
-        patron: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
         book_id: loan.dataValues.book_id,
         patron_id: loan.dataValues.patron_id,
         loaned_on: formatDate(loan.dataValues.loaned_on),
