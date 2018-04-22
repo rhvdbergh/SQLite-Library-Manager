@@ -374,10 +374,21 @@ router.get('/new_loan.html', function(req, res, next) {
 /* POST new loan info */
 router.post('/new_loan.html', function(req, res, next) {
   
-  if (!isValidDate(req.body.loaned_on)) { // not a valid date
-    let error = [
-      { message: 'Please enter a validate date for the "Loaned on" field.' }
-    ];
+  if (!isValidDate(req.body.loaned_on) // loaned on is required and should be a valid date
+      || (!isValidDate(req.body.return_by) // return by date is optional
+            // so if the return by date is '' or null, this is still acceptable 
+            && (req.body.return_by !== '' || req.body.return_by !== null))) { // not a valid date
+    
+    let error = [];
+
+    if (!isValidDate(req.body.loaned_on)) {
+      error.push({ message: 'Please enter a validate date for the "Loaned on" field.' });
+    }; // end if req.body.loaned_on error message
+
+    if (!isValidDate(req.body.return_by)) {
+      error.push({ message: 'Please enter a validate date for the "Return by" field or leave this field empty.' });
+    }; // end if req.body.return_by error message
+
     let today = new Date();
     today = formatDate(today);
     let returnDate = new Date();
