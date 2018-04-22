@@ -44,7 +44,7 @@ router.post('/new_book.html', function(req, res, next) {
     })
     .catch((error) => {
       if (error.name === "SequelizeValidationError") {
-        res.render('new_book', { book: Book.build(req.body), errors: error.errors });
+        res.render('new_book', { book: Book.build(req.body), errors: error.errors, button_message: 'Create New Book' });
       } else { throw error; }
     }).catch((error) => console.log('error', error));
   
@@ -54,7 +54,7 @@ router.post('/new_book.html', function(req, res, next) {
 router.get('/all_books.html', function(req, res, next) {
 
   Book.findAll()
-    .then((books) => res.render('all_books', { books: books, title: "All Books" }));
+    .then((books) => res.render('all_books', { books: books, title: "Books" }));
 });
 
 /* GET overdue books page. */
@@ -119,20 +119,29 @@ router.get('/book/:id', function(req, res, next) {
       }]
     })
   .then((loans) => {
-    const formattedLoans = loans.map((loan) => {
-      return {
-        book: loan.dataValues.Book,
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
-      }
-    });
-    res.render('book_detail', { loans: formattedLoans, book: formattedLoans[0].book, title: formattedLoans[0].book.dataValues.title, button_message: 'Update' })
-  });
+    if (loans.length > 0) {
+      const formattedLoans = loans.map((loan) => {
+        return {
+          book: loan.dataValues.Book,
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          book_id: loan.dataValues.book_id,
+          patron_id: loan.dataValues.patron_id,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by),
+          returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      });
+      res.render('book_detail', { loans: formattedLoans, book: formattedLoans[0].book, title: formattedLoans[0].book.dataValues.title, button_message: 'Update' })
+    } else {
+      Book.findById(req.params.id)
+      .then((book) => {
+        const formattedLoans = [];
+        res.render('book_detail', { loans: formattedLoans, book: book, title: book.dataValues.title, button_message: 'Update' })
+      });
+    } 
+    }
+  );
 });
 
 /* POST edit book page. */
@@ -221,7 +230,7 @@ router.post('/new_patron.html', function(req, res, next) {
   })
   .catch((error) => {
     if (error.name === "SequelizeValidationError") {
-      res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors });
+      res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors, button_message: 'Create New Patron' });
     } else { throw error; }
   }).catch((error) => console.log('error', error));
 });
@@ -240,24 +249,30 @@ router.get('/patron/:id', function(req, res, next) {
         }]
       })
   .then((loans) => {
-    const formattedLoans = loans.map((loan) => {
-       return {
-        patron: loan.dataValues.Patron,
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
-        }
+    if (loans.length > 0) {
+      const formattedLoans = loans.map((loan) => {
+        return {
+          patron: loan.dataValues.Patron,
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          book_id: loan.dataValues.book_id,
+          patron_id: loan.dataValues.patron_id,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by),
+          returned_on: formatDate(loan.dataValues.returned_on)
+          }
+        });
+        res.render('patron_detail', { loans: formattedLoans, patron: formattedLoans[0].patron, title: formattedLoans[0].patron_name, button_message: 'Update' })
+      } else {
+        Patron.findById(req.params.id)
+        .then((patron) => {
+          const formattedLoans = [];
+          const patron_name = `${patron.first_name} ${patron.last_name}`;
+        res.render('patron_detail', { loans: formattedLoans, patron: patron, title: patron_name, button_message: 'Update' })
+        });
       }
-    )
-      return formattedLoans; 
-    })
-    .then((loans) => {
-      res.render('patron_detail', { loans: loans, patron: loans[0].patron, title: loans[0].patron_name, button_message: 'Update' })
-    });
+    }
+  );
 });
 
 /* POST edit patron page. */
@@ -362,7 +377,7 @@ router.get('/all_loans.html', function(req, res, next) {
       }
 
     });
-    res.render('all_loans', { loans: formattedLoans, title: 'All Loans' })
+    res.render('all_loans', { loans: formattedLoans, title: 'Loans' })
   });
 });
 

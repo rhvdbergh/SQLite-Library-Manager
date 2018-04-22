@@ -14,7 +14,7 @@ form(method="post")
     label(for='genre') Genre
     input#genre(type='text' name='genre' value=book.dataValues.genre)
   p
-    label(for='first_published') First Published
+    label(for='first_published') Year Released (First Published)
     input#first_published(type='text' name='first_published' book.dataValues.first_published)
   p
     input(type='submit', value=`${button_message}`)
