@@ -2,6 +2,10 @@ extends layout
 
 block content
   h1 New Loan
+  if (errors)
+    h2.error Validation error!
+      each error in errors
+        h3.error= error.message
   form(method='post')
     p
       label(for='book_id') Book
