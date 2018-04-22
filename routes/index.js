@@ -407,6 +407,9 @@ router.post('/new_loan.html', function(req, res, next) {
                   loan: Loan.build(), 
                   books: books, 
                   patrons: patrons, 
+                  selected_book: parseInt(req.body.book_id), // keep the book selected by user
+                  selected_patron: parseInt(req.body.patron_id), // keep the patron selected by user
+                  // the selected_book and selected_patron is fed to a conditional in the pug markup
                   today: req.body.loaned_on, // keep the date submitted by the user
                   return_date: req.body.return_by,  // keep the date submitted by the user
                   errors: error }

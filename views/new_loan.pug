@@ -11,12 +11,18 @@ block content
       label(for='book_id') Book
       select#book_id(name='book_id')
         each book in books
-          option(value=`${book.dataValues.id}`) #{book.dataValues.title}
+          if selected_book === book.dataValues.id
+            option(value=`${book.dataValues.id}` selected='selected') #{book.dataValues.title}
+          else
+            option(value=`${book.dataValues.id}`) #{book.dataValues.title}            
     p
       label(for='patron_id') Patron
       select#patron_id(name='patron_id')
         each patron in patrons
-          option(value=`${patron.dataValues.id}`) #{patron.dataValues.first_name} #{patron.dataValues.last_name} 
+          if selected_patron === patron.dataValues.id
+            option(value=`${patron.dataValues.id}` selected='selected') #{patron.dataValues.first_name} #{patron.dataValues.last_name} 
+          else  
+            option(value=`${patron.dataValues.id}`) #{patron.dataValues.first_name} #{patron.dataValues.last_name} 
     p
       label(for='loaned_on') Loaned on:
       input#loaned_on(type='text', value=`${today}` name='loaned_on')
