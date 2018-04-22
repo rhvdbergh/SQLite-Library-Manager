@@ -16,20 +16,40 @@ function formatDate(date) {
   } else return null;
 }
 
-// tests if the date is valid
+// tests for a date in the format yyyy-mm-dd
 function isValidDate(date) {
+
   // regEx tests for years between 1900-2199 (1900 in case of old entries)
+  // as well as two digits for months and two digits for days
   let regEx = /^(19|20|21)\d\d-\d{2}-\d{2}$/; 
   let year = date.substring(0,4);
   let month = date.substring(5, 7);
   let day = date.substring(8,10);
  
-  console.log(year, month, day);
+  if (month < 1) return false;
+  if (month > 12) return false;
+  if (day < 1) return false;
   
-  date.substring(5, 7)-1, date.substring(8, 10)
 
-  if (regEx.test(date)
-      && (true)) return true;
+  if (['01', '03', '05', '07', '08', '10', '12'].includes(month)) {
+    if (day > 31) return false;
+  }
+
+  if (['04', '06', '09', '11'].includes(month)) {
+    if (day > 30) return false;
+  }
+
+  if (month === '02') { // February needs to be checked for leap years
+    if (year % 4 === 0) { // it is a leap year
+      if (day > 29) return false;
+    } else if (day > 28) return false;
+  }
+  
+  // make sure that the year falls within range and that the months
+  // and days are two digits
+  // if so, the date is valid at this point
+  if (regEx.test(date)) return true;
+  return false;
 }
 
 ////////////////////////////////
