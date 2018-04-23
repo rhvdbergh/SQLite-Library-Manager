@@ -471,10 +471,25 @@ router.post('/new_loan.html', function(req, res, next) {
 
   Loan.create(req.body)
   .then((loan) => {
+
     loan.setBook(req.body.book_id);
     loan.setPatron(req.body.patron_id);
-    res.redirect('/');
+
+    let date = req.body.loaned_on; 
+    // because r.b.loaned_on is returned as a string in the format yyyy-mm-dd 
+    // we have to create a new Date -- otherwise date displays wrong in SQL
+    // because it is based on time zone 
+    const loaned_on = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
+    loan.update({ loaned_on: loaned_on});
+    
+    date = req.body.return_by; 
+    // because r.b.return_by is returned as a string in the format yyyy-mm-dd 
+    // we have to create a new Date -- otherwise date displays wrong in SQL
+    // because it is based on time zone 
+    const return_by = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
+    loan.update({ return_by: return_by});
   })
+  .then(() => { res.redirect('/') })
   .catch((error) => {
     if (error.name === "SequelizeValidationError") {
       res.render('new_loan', { loan: Loan.build(req.body), errors: error.errors });
