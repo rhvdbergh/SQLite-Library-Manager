@@ -174,7 +174,7 @@ router.get('/book/:id', function(req, res, next) {
         }
       });
       res.render('book_detail', { loans: formattedLoans, book: formattedLoans[0].book, title: formattedLoans[0].book.dataValues.title, button_message: 'Update' })
-    } else {
+    } else { // there are no loans, so pass an empty array
       Book.findById(req.params.id)
       .then((book) => {
         const formattedLoans = [];
@@ -190,8 +190,13 @@ router.post('/book/:id', function(req, res, next) {
   Book.findById(req.params.id) 
   .then((book) => {
     book.update(req.body)
-  })
-  .then(() => res.redirect('/'));
+    .then(() => res.redirect('/'))
+    .catch((error) => {
+      if (error.name === "SequelizeValidationError") {
+        res.render('new_book', { book: Book.build(req.body), errors: error.errors, button_message: 'Update' });
+      } else { throw error; }
+    }).catch((error) => console.log('error', error));
+  });
 });
 
 /* GET return book page. */
