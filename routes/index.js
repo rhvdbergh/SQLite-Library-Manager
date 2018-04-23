@@ -96,7 +96,12 @@ router.get('/all_books.html', function(req, res, next) {
 /* GET overdue books page. */
 router.get('/overdue_books.html', function(req, res, next) {
   
-  const today = new Date();
+  const date = formatDate(new Date()); // this returns a string in the format yyyy-mm-dd
+  // this is a workaround to force sequelize to make a new date for today
+  // that will be stored in the same way as the other dates in the database
+  // so that the dates can be compared
+  const today = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10), 0, 0, 0, 0);
+  
   let book_ids =[];
 
   Loan.findAll( 
