@@ -186,24 +186,44 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
 /* GET checked books page. */
 router.get(`${checked_books_URL}`, function(req, res, next) {
 
-  let book_ids =[];
-  
-  Loan.findAll( 
-      { where: 
-        { loaned_on: {[Op.not]: null}, // test for empty cell
-        returned_on: null} 
-      })
-  .then((loans) =>
-  {
-    loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
-  })
-  .then(() => {
-    Book.findAll( 
-      {where: 
-        { id: [...book_ids]}
-      })
-      .then((books) => res.render('checked_books', { books: books, title: 'Books Checked Out'  }))
-  })
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect(`${checked_books_URL}?page=1`);
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect(`${checked_books_URL}?page=1`);
+
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    let book_ids =[];
+    
+    Loan.findAll( 
+        { where: 
+          { loaned_on: {[Op.not]: null}, // test for empty cell
+          returned_on: null} 
+        })
+    .then((loans) =>
+    {
+      loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
+    })
+    .then(() => {
+      Book.findAndCountAll( 
+        {where: 
+          { id: [...book_ids]}
+        })
+        .then((books) => res.render('checked_books', { 
+          books: books.rows, 
+          title: 'Books Checked Out',
+          totalPages: Math.ceil(books.count / 10),
+          totalBooks: books.count,
+          currentUrl: checked_books_URL  
+        }))
+    })
+  } // end else
 });
 
 /* GET edit book page. */
