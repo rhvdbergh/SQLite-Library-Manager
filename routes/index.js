@@ -5,6 +5,8 @@ const express = require('express');
 const router = express.Router();
 const { Book, Loan, Patron } = require('../models/index.js');
 
+const isNumber = /^[0-9]+$/
+
 ////////////////////////////////
 //       HELPER METHODS       //
 ////////////////////////////////
@@ -89,8 +91,6 @@ router.post('/new_book.html', function(req, res, next) {
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
 
-  const isNumber = /^[0-9]+$/
-
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
@@ -98,6 +98,7 @@ router.get('/all_books.html', function(req, res, next) {
   } else if (!req.query.page.match(isNumber)) {
     console.log('redirecting cause page NaN');
     res.redirect('/all_books.html?page=1');
+
   } else {
 
     let page = req.query.page;
@@ -127,30 +128,53 @@ router.get('/all_books.html', function(req, res, next) {
 /* GET overdue books page. */
 router.get('/overdue_books.html', function(req, res, next) {
   
-  const date = formatDate(new Date()); // this returns a string in the format yyyy-mm-dd
-  // this is a workaround to force sequelize to make a new date for today
-  // that will be stored in the same way as the other dates in the database
-  // so that the dates can be compared
-  const today = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10), 0, 0, 0, 0);
-  
-  let book_ids =[];
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect('/overdue_books.html?page=1');
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect('/overdue_books.html?page=1');
 
-  Loan.findAll( 
+  } else {
+  
+    const date = formatDate(new Date()); // this returns a string in the format yyyy-mm-dd
+    // this is a workaround to force sequelize to make a new date for today
+    // that will be stored in the same way as the other dates in the database
+    // so that the dates can be compared
+    const today = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10), 0, 0, 0, 0);
+    
+    let book_ids =[];
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    Loan.findAll( 
       { where: 
         { return_by: {[Op.lt]: today }, 
         returned_on: {[Op.eq]: null} }
       })
     .then((loans) =>
-    {
-      loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));
-    })
+      { loans.forEach((loan) => book_ids.push(loan.dataValues.book_id));}
+    )
     .then(() => {
-      Book.findAll( 
+      Book.findAndCountAll( 
         {where: 
           { id: [...book_ids]}
         })
-        .then((books) => res.render('overdue_books', { books: books, title: 'Overdue Books'  }))
+      .then((books) => {
+        if (offset > books.count) {
+          console.log('Wrong page given in URL query, redirecting to page 1');
+          res.redirect('/overdue_books.html?page=1');
+        }
+        res.render('overdue_books', { 
+          books: books.rows, 
+          title: 'Overdue Books',
+          totalPages: Math.ceil(books.count / 10),
+          currentPage: page,
+          totalBooks: books.count  }
+      )})
     })
+  } // end else
 });
 
 /* GET checked books page. */
