@@ -7,6 +7,10 @@ const { Book, Loan, Patron } = require('../models/index.js');
 
 const isNumber = /^[0-9]+$/
 
+const all_books_URL = '/all_books.html';
+const overdue_books_URL = '/overdue_books.html';
+const checked_books_URL = '/checked_books.html';
+
 ////////////////////////////////
 //       HELPER METHODS       //
 ////////////////////////////////
@@ -78,7 +82,7 @@ router.post('/new_book.html', function(req, res, next) {
 
   Book.create(req.body)
     .then(() => {
-      res.redirect('all_books.html');
+      res.redirect(`${all_books_URL}`);
     })
     .catch((error) => {
       if (error.name === "SequelizeValidationError") {
@@ -89,15 +93,15 @@ router.post('/new_book.html', function(req, res, next) {
 });
 
 /* GET all books page. */
-router.get('/all_books.html', function(req, res, next) {
+router.get(`${all_books_URL}`, function(req, res, next) {
 
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
-    res.redirect('/all_books.html?page=1');
+    res.redirect(`${all_books_URL}?page=1`);
   } else if (!req.query.page.match(isNumber)) {
     console.log('redirecting cause page NaN');
-    res.redirect('/all_books.html?page=1');
+    res.redirect(`${all_books_URL}?page=1`);
 
   } else {
 
@@ -108,7 +112,7 @@ router.get('/all_books.html', function(req, res, next) {
     .then((totalBooks) => {
       if (offset > totalBooks) {// page query must be wrong!
         console.log('Wrong page given in URL query, redirecting to page 1');
-        res.redirect('/all_books.html?page=1');
+        res.redirect(`${all_books_URL}?page=1`);
       }
       Book.findAll( {offset: offset, limit: 10})
         .then((books) => {
@@ -117,7 +121,8 @@ router.get('/all_books.html', function(req, res, next) {
               title: "Books", 
               totalPages: Math.ceil(totalBooks / 10), 
               currentPage: page,
-              totalBooks: totalBooks 
+              totalBooks: totalBooks,
+              currentUrl: all_books_URL
             }
           ); // end render
       }); // end then books
@@ -126,15 +131,15 @@ router.get('/all_books.html', function(req, res, next) {
 });
 
 /* GET overdue books page. */
-router.get('/overdue_books.html', function(req, res, next) {
+router.get(`${overdue_books_URL}`, function(req, res, next) {
   
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
-    res.redirect('/overdue_books.html?page=1');
+    res.redirect(`${overdue_books_URL}?page=1`);
   } else if (!req.query.page.match(isNumber)) {
     console.log('redirecting cause page NaN');
-    res.redirect('/overdue_books.html?page=1');
+    res.redirect(`${overdue_books_URL}?page=1`);
 
   } else {
   
@@ -164,21 +169,22 @@ router.get('/overdue_books.html', function(req, res, next) {
       .then((books) => {
         if (offset > books.count) {
           console.log('Wrong page given in URL query, redirecting to page 1');
-          res.redirect('/overdue_books.html?page=1');
+          res.redirect(`${overdue_books_URL}?page=1`);
         }
         res.render('overdue_books', { 
           books: books.rows, 
           title: 'Overdue Books',
           totalPages: Math.ceil(books.count / 10),
           currentPage: page,
-          totalBooks: books.count  }
+          totalBooks: books.count,
+          currentUrl: overdue_books_URL }
       )})
     })
   } // end else
 });
 
 /* GET checked books page. */
-router.get('/checked_books.html', function(req, res, next) {
+router.get(`${checked_books_URL}`, function(req, res, next) {
 
   let book_ids =[];
   
