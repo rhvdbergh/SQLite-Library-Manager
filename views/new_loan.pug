@@ -6,6 +6,7 @@ block content
   form(method='post')
     p
       label(for='book_id') Book
+       sup *
       select#book_id(name='book_id')
         each book in books
           if selected_book === book.dataValues.id
@@ -14,6 +15,7 @@ block content
             option(value=`${book.dataValues.id}`) #{book.dataValues.title}            
     p
       label(for='patron_id') Patron
+        sup *
       select#patron_id(name='patron_id')
         each patron in patrons
           if selected_patron === patron.dataValues.id
@@ -22,9 +24,12 @@ block content
             option(value=`${patron.dataValues.id}`) #{patron.dataValues.first_name} #{patron.dataValues.last_name} 
     p
       label(for='loaned_on') Loaned on:
+        sup *
       input#loaned_on(type='text', value=`${today}` name='loaned_on')
     p
       label(for='return_by') Return by:
       input#return_by(type='text', value=`${return_date}` name='return_by')
+    sup *required
+    
     p
       input(type='submit', value='Create New Loan')
