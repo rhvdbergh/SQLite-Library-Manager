@@ -89,8 +89,33 @@ router.post('/new_book.html', function(req, res, next) {
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
 
-  Book.findAll()
-    .then((books) => res.render('all_books', { books: books, title: "Books" }));
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect('/all_books.html?page=1');
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    Book.count()
+    .then((totalBooks) => {
+      if (offset > totalBooks) {// page query must be wrong!
+        console.log('Wrong page given in URL query, redirecting to page 1');
+        res.redirect('/all_books.html?page=1');
+      }
+      Book.findAll( {offset: offset, limit: 10})
+        .then((books) => {
+          res.render('all_books', { 
+              books: books, 
+              title: "Books", 
+              page: page, 
+              totalBooks: totalBooks 
+            }
+          ); // end render
+      }); // end then books
+    }); // end then totalBooks
+  } // end else
 });
 
 /* GET overdue books page. */
