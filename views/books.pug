@@ -23,8 +23,14 @@ table
         td #{book.dataValues.author}
         td #{book.dataValues.genre}
         td #{book.dataValues.first_published}
-//- -var i = 1;
-//- ul
-//-   while i < 5
-//-     li= i++
-//- p Total books: #{totalBooks}
+-var i = 1;
+div.paginationLinks 
+  p Page
+  ul
+    while i <= totalPages
+      li
+        if currentPage == i 
+          a(href=`/all_books.html?page=${i}`).active= i++  
+        else 
+          a(href=`/all_books.html?page=${i}`)= i++             
+p Total books in library: #{totalBooks}

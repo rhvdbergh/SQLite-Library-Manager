@@ -59,6 +59,16 @@ nav ul li {
     padding-left: 7px;
 }
 
+.paginationLinks ul li, .paginationLinks ul, .paginationLinks p {
+    display: inline-block;
+    list-style: none;
+    padding-left: 10px;
+}
+
+.paginationLinks a.active {
+    color: black;
+}
+
 nav ul li:after {
     content: " | ";
 }

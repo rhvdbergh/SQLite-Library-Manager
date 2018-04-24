@@ -89,9 +89,14 @@ router.post('/new_book.html', function(req, res, next) {
 /* GET all books page. */
 router.get('/all_books.html', function(req, res, next) {
 
+  const isNumber = /^[0-9]+$/
+
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
+    res.redirect('/all_books.html?page=1');
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
     res.redirect('/all_books.html?page=1');
   } else {
 
@@ -109,7 +114,8 @@ router.get('/all_books.html', function(req, res, next) {
           res.render('all_books', { 
               books: books, 
               title: "Books", 
-              page: page, 
+              totalPages: Math.ceil(totalBooks / 10), 
+              currentPage: page,
               totalBooks: totalBooks 
             }
           ); // end render
