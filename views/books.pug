@@ -1,4 +1,7 @@
-h1= title
+if searchTerm
+  h1 #{title} - Search results for '#{searchTerm}'
+else
+  h1= title
 p
   a.button(href='new_book.html') Create New Book
 p

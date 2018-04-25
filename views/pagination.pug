@@ -5,7 +5,13 @@ div.paginationLinks
     while i <= totalPages
       li
         if currentPage == i 
-          a(href=`${currentUrl}?page=${i}`).active= i++  
+          if searchTerm !== '%'
+            a(href=`${currentUrl}?page=${i}&search_term=${searchTerm}`).active= i++  
+          else 
+            a(href=`${currentUrl}?page=${i}`).active= i++  
         else 
-          a(href=`${currentUrl}?page=${i}`)= i++             
+          if searchTerm !== '%' 
+            a(href=`${currentUrl}?page=${i}&search_term=${searchTerm}`)= i++   
+          else
+            a(href=`${currentUrl}?page=${i}`)= i++   
 p #{title} in library database: #{totalItems}

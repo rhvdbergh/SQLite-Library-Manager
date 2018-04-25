@@ -103,9 +103,11 @@ router.get(`${all_books_URL}`, function(req, res, next) {
 
   if (req.query.search_term) {
     // to make sure that the first page of the results loads
+    // the first time the query loads
     // and user is not redirected by the following conditionals
-    req.query.page = '1'; 
+    if (!req.query.page) req.query.page = '1'; 
     search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
+    // res.redirect(`${all_books_URL}?page=1`)
   }
   // for pagination
   if (!req.query.page) {
@@ -120,35 +122,29 @@ router.get(`${all_books_URL}`, function(req, res, next) {
     let page = req.query.page;
     let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
 
-    Book.count()
-    .then((totalBooks) => {
-      if (offset > totalBooks) {// page query must be wrong!
-        console.log('Wrong page given in URL query, redirecting to page 1');
-        res.redirect(`${all_books_URL}?page=1`);
-      }
-      Book.findAll( {
+    Book.findAndCountAll( {
+        where: {
+            [Op.or]: {
+              title: {[Op.like]: `${search_term}`},
+              author: {[Op.like]: `${search_term}`},
+              genre: {[Op.like]: `${search_term}`}
+            } // end Op.or
+          }, // end where
           offset: offset, 
           limit: 10,
-          where: {
-              [Op.or]: {
-                title: {[Op.like]: `${search_term}`},
-                author: {[Op.like]: `${search_term}`},
-                genre: {[Op.like]: `${search_term}`}
-              } // end Op.or
-            } // end where
-          }) //end query findAll
-        .then((books) => {
-          res.render('all_books', { 
-              books: books, 
-              title: "Books", 
-              totalPages: Math.ceil(totalBooks / 10), 
-              currentPage: page,
-              totalItems: totalBooks,
-              currentUrl: all_books_URL
-            }
-          ); // end render
-      }); // end then books
-    }); // end then totalBooks
+        }) //end query findAll
+      .then((books) => {
+        res.render('all_books', { 
+            books: books.rows, 
+            title: "Books", 
+            totalPages: Math.ceil(books.count / 10), 
+            currentPage: page,
+            totalItems: books.count,
+            currentUrl: all_books_URL,
+            searchTerm: req.query.search_term
+          }
+        ); // end render
+    }); // end then books
   } // end else
 });
 
