@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  if searchTerm
+    h1 #{title} - Search results for '#{searchTerm}'
+  else
+    h1= title
+  p
+    a.button(href='new_patron.html') Create New Patron
+  form(method='get')
+    p
+      input#search_box(type='text' name='search_term' placeholder='Search ...')
+  table
+    thead
+      tr
+        th Name
+        th Address
+        th Email
+        th Library ID
+        th Zip
+    tbody
+      each patron in patrons
+        tr
+          td
+            a(href=`patron/${patron.dataValues.id}`) #{patron.dataValues.first_name} #{patron.dataValues.last_name}
+          td #{patron.dataValues.address}
+          td #{patron.dataValues.email}
+          td #{patron.dataValues.library_id}
+          td #{patron.dataValues.zip_code}
+  include pagination.pug

@@ -1,0 +1,22 @@
+h1= title
+include validation_errors.pug
+form(method="post")
+  p
+    label(for='title') Title
+      sup *
+    input#title(type='text' name='title' value=book.dataValues.title)
+  p
+    label(for='author') Author
+      sup *
+    input#author(type='text' name='author' value=book.dataValues.author)
+  p
+    label(for='genre') Genre
+      sup *
+    input#genre(type='text' name='genre' value=book.dataValues.genre)
+  p
+    label(for='first_published') First Published
+    input#first_published(type='text' name='first_published' value=book.dataValues.first_published)
+  sup *required
+    
+  p
+    input(type='submit', value=`${button_message}`)
