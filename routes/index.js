@@ -10,6 +10,7 @@ const isNumber = /^[0-9]+$/
 const all_books_URL = '/all_books.html';
 const overdue_books_URL = '/overdue_books.html';
 const checked_books_URL = '/checked_books.html';
+const all_patrons_URL = '/all_patrons.html';
 
 ////////////////////////////////
 //       HELPER METHODS       //
@@ -114,14 +115,14 @@ router.get(`${all_books_URL}`, function(req, res, next) {
         console.log('Wrong page given in URL query, redirecting to page 1');
         res.redirect(`${all_books_URL}?page=1`);
       }
-      Book.findAll( {offset: offset, limit: 10})
+      Book.findAll( {offset: offset, limit: 10} )
         .then((books) => {
           res.render('all_books', { 
               books: books, 
               title: "Books", 
               totalPages: Math.ceil(totalBooks / 10), 
               currentPage: page,
-              totalBooks: totalBooks,
+              totalItems: totalBooks,
               currentUrl: all_books_URL
             }
           ); // end render
@@ -176,7 +177,7 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
           title: 'Overdue Books',
           totalPages: Math.ceil(books.count / 10),
           currentPage: page,
-          totalBooks: books.count,
+          totalItems: books.count,
           currentUrl: overdue_books_URL }
       )})
     })
@@ -219,7 +220,7 @@ router.get(`${checked_books_URL}`, function(req, res, next) {
           books: books.rows, 
           title: 'Books Checked Out',
           totalPages: Math.ceil(books.count / 10),
-          totalBooks: books.count,
+          totalItems: books.count,
           currentUrl: checked_books_URL  
         }))
     })
@@ -371,8 +372,39 @@ router.post('/return/:id', function(req, res, next) {
 /* GET all patrons page. */
 router.get('/all_patrons.html', function(req, res, next) {
   
-  Patron.findAll()
-  .then((patrons) => res.render('all_patrons', { patrons: patrons }));
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect(`${all_patrons_URL}?page=1`);
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect(`${all_patrons_URL}?page=1`);
+
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    Patron.count()
+    .then((totalPatrons) => {
+      if (offset > totalPatrons) {// page query must be wrong!
+        console.log('Wrong page given in URL query, redirecting to page 1');
+        res.redirect(`${all_patrons_URL}?page=1`);
+      }
+      Patron.findAll( {offset: offset, limit: 10} )
+      .then((patrons) => { 
+        res.render('all_patrons', { 
+          patrons: patrons,
+          title: 'Patrons',
+          totalPages: Math.ceil(totalPatrons / 10),
+          currentPage: page,
+          currentUrl: all_patrons_URL,
+          totalItems: totalPatrons
+        }
+      );
+      });
+    });
+  } // end else
 });
 
 /* GET new patrons page. */

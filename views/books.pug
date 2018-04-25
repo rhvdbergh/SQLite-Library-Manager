@@ -23,14 +23,4 @@ table
         td #{book.dataValues.author}
         td #{book.dataValues.genre}
         td #{book.dataValues.first_published}
--var i = 1;
-div.paginationLinks 
-  p Page
-  ul
-    while i <= totalPages
-      li
-        if currentPage == i 
-          a(href=`${currentUrl}?page=${i}`).active= i++  
-        else 
-          a(href=`${currentUrl}?page=${i}`)= i++             
-p #{title} in library: #{totalBooks}
+include pagination.pug

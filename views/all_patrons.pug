@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h1 Patrons
+  h1= title
   p
     a.button(href='new_patron.html') Create New Patron
   table
@@ -21,4 +21,4 @@ block content
           td #{patron.dataValues.email}
           td #{patron.dataValues.library_id}
           td #{patron.dataValues.zip_code}
-  
+  include pagination.pug
