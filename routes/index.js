@@ -198,7 +198,9 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
                 author: {[Op.like]: `${search_term}`},
                 genre: {[Op.like]: `${search_term}`}
               } // end Op.or
-          } // end where
+          }, // end where
+          offset: offset,
+          limit: 10
         }) //end findAndCountAll
       .then((books) => {
         if (offset > books.count) {
@@ -221,6 +223,16 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
 
 /* GET checked books page. */
 router.get(`${checked_books_URL}`, function(req, res, next) {
+
+  let search_term = '%'; // by default, search for everything - % = wildcard for everything
+  
+  if (req.query.search_term) {
+    // to make sure that the first page of the results loads
+    // the first time the query loads
+    // and user is not redirected by the following conditionals
+    if (!req.query.page) req.query.page = '1'; 
+    search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
+  }
 
   // for pagination
   if (!req.query.page) {
@@ -248,8 +260,16 @@ router.get(`${checked_books_URL}`, function(req, res, next) {
     })
     .then(() => {
       Book.findAndCountAll( 
-        {where: 
-          { id: [...book_ids]}
+          {where: 
+            { id: [...book_ids],
+            [Op.or]: {
+              title: {[Op.like]: `${search_term}`},
+              author: {[Op.like]: `${search_term}`},
+              genre: {[Op.like]: `${search_term}`}
+            } // end Op.or
+          },  // end where
+          offset: offset,
+          limit: 10
         })
         .then((books) => res.render('checked_books', { 
           books: books.rows, 
@@ -257,7 +277,8 @@ router.get(`${checked_books_URL}`, function(req, res, next) {
           totalPages: Math.ceil(books.count / 10),
           totalItems: books.count,
           currentPage: page,
-          currentUrl: checked_books_URL  
+          currentUrl: checked_books_URL,
+          searchTerm: req.query.search_term            
         }))
     })
   } // end else
@@ -408,6 +429,16 @@ router.post('/return/:id', function(req, res, next) {
 /* GET all patrons page. */
 router.get('/all_patrons.html', function(req, res, next) {
   
+  let search_term = '%'; // by default, search for everything - % = wildcard for everything
+  
+  if (req.query.search_term) {
+    // to make sure that the first page of the results loads
+    // the first time the query loads
+    // and user is not redirected by the following conditionals
+    if (!req.query.page) req.query.page = '1'; 
+    search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
+  }
+
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
@@ -421,25 +452,32 @@ router.get('/all_patrons.html', function(req, res, next) {
     let page = req.query.page;
     let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
 
-    Patron.count()
-    .then((totalPatrons) => {
-      if (offset > totalPatrons) {// page query must be wrong!
-        console.log('Wrong page given in URL query, redirecting to page 1');
-        res.redirect(`${all_patrons_URL}?page=1`);
+    Patron.findAndCountAll( {
+      where: {
+        [Op.or]: {
+          first_name: {[Op.like]: `${search_term}`},
+          last_name: {[Op.like]: `${search_term}`},
+          email: {[Op.like]: `${search_term}`},
+          library_id: {[Op.like]: `${search_term}`},
+          address: {[Op.like]: `${search_term}`},
+          zip_code: {[Op.like]: `${search_term}`}
+        } // end Op.or
+      }, // end where
+      offset: offset, 
+      limit: 10} 
+    ) // end findAndCountAll
+    .then((patrons) => { 
+      res.render('all_patrons', { 
+        patrons: patrons.rows,
+        title: 'Patrons',
+        totalPages: Math.ceil(patrons.count / 10),
+        currentPage: page,
+        currentUrl: all_patrons_URL,
+        totalItems: patrons.count,
+        searchTerm: req.query.search_term          
       }
-      Patron.findAll( {offset: offset, limit: 10} )
-      .then((patrons) => { 
-        res.render('all_patrons', { 
-          patrons: patrons,
-          title: 'Patrons',
-          totalPages: Math.ceil(totalPatrons / 10),
-          currentPage: page,
-          currentUrl: all_patrons_URL,
-          totalItems: totalPatrons
-        }
-      );
-      });
-    });
+    );
+  });
   } // end else
 });
 
@@ -809,7 +847,7 @@ router.get(`${checked_loans_URL}`, function(req, res, next) {
       ],
       offset: offset,
       limit: 10
-      }
+    }
     )
     .then((loans) => {
       const formattedLoans = loans.rows.map((loan) => {

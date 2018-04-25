@@ -1,9 +1,15 @@
 extends layout
 
 block content
-  h1= title
+  if searchTerm
+    h1 #{title} - Search results for '#{searchTerm}'
+  else
+    h1= title
   p
     a.button(href='new_patron.html') Create New Patron
+  form(method='get')
+    p
+      input#search_box(type='text' name='search_term' placeholder='Search ...')
   table
     thead
       tr
