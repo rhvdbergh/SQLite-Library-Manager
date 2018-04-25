@@ -1,6 +1,11 @@
 # SQLite-Library-Manager
 Treehouse Techdegree Project 10: Library Manager using Express, Pug, SQLite3 and Sequelize ORM
 
+## How to install
+- On the command line, run `npm install`
+- On the command line, run `node npm start`
+- Point a browser to `localhost:3000`
+
 ## Treehouse Instructions: 
 You've been tasked with creating a library management system for a small library. The librarian has been using a simple sqlite database and has been entering data in manually. The librarian wants a more intuitive way to handle the library's books, patrons and loans.
 
