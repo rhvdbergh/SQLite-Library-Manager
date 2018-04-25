@@ -13,6 +13,7 @@ const checked_books_URL = '/checked_books.html';
 const all_patrons_URL = '/all_patrons.html';
 const all_loans_URL = '/all_loans.html';
 const checked_loans_URL = '/checked_loans.html';
+const overdue_loans_URL = '/overdue_loans.html';
 
 ////////////////////////////////
 //       HELPER METHODS       //
@@ -685,41 +686,65 @@ router.get('/all_loans.html', function(req, res, next) {
 });
 
 /* GET overdue loans page. */
-router.get('/overdue_loans.html', function(req, res, next) {
+router.get(`${overdue_loans_URL}`, function(req, res, next) {
 
-  const date = formatDate(new Date()); // this returns a string in the format yyyy-mm-dd
-  // this is a workaround to force sequelize to make a new date for today
-  // that will be stored in the same way as the other dates in the database
-  // so that the dates can be compared
-  const today = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10), 0, 0, 0, 0);
-  
-  Loan.findAll( 
-    { where: 
-      { return_by: {[Op.lt]: today }, 
-      returned_on: {[Op.eq]: null} 
-      },
-      include: [
-        {
-          model: Book
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect(`${overdue_loans_URL}?page=1`);
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect(`${overdue_loans_URL}?page=1`);
+
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+    const date = formatDate(new Date()); // this returns a string in the format yyyy-mm-dd
+    // this is a workaround to force sequelize to make a new date for today
+    // that will be stored in the same way as the other dates in the database
+    // so that the dates can be compared
+    const today = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10), 0, 0, 0, 0);
+    
+    Loan.findAndCountAll( 
+      { where: 
+        { return_by: {[Op.lt]: today }, 
+        returned_on: {[Op.eq]: null} 
         },
-        {
-          model: Patron
-        }
-    ]})
-  .then((loans) => {
-    const formattedLoans = loans.map((loan) => {
-      return {
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
+        include: [
+          {
+            model: Book
+          },
+          {
+            model: Patron
+          }
+        ],
+        offset: offset,
+        limit: 10
       }
+    )
+    .then((loans) => {
+      const formattedLoans = loans.rows.map((loan) => {
+        return {
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          book_id: loan.dataValues.book_id,
+          patron_id: loan.dataValues.patron_id,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by),
+          returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      });
+      res.render('overdue_loans', { 
+        loans: formattedLoans, 
+        title: 'Overdue Loans',
+        totalPages: Math.ceil(loans.count / 10),
+        totalItems: loans.count,
+        currentPage: page,
+        currentUrl: overdue_loans_URL
+       })
     });
-    res.render('overdue_loans', { loans: formattedLoans, title: 'Overdue Loans' })
-  });
+  } // end else
 });
 
 /* GET checked loans page. */
