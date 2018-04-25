@@ -107,8 +107,8 @@ router.get(`${all_books_URL}`, function(req, res, next) {
     // and user is not redirected by the following conditionals
     if (!req.query.page) req.query.page = '1'; 
     search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
-    // res.redirect(`${all_books_URL}?page=1`)
   }
+
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
@@ -151,6 +151,16 @@ router.get(`${all_books_URL}`, function(req, res, next) {
 /* GET overdue books page. */
 router.get(`${overdue_books_URL}`, function(req, res, next) {
   
+  let search_term = '%'; // by default, search for everything - % = wildcard for everything
+  
+  if (req.query.search_term) {
+    // to make sure that the first page of the results loads
+    // the first time the query loads
+    // and user is not redirected by the following conditionals
+    if (!req.query.page) req.query.page = '1'; 
+    search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
+  }
+
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
@@ -181,9 +191,15 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
     )
     .then(() => {
       Book.findAndCountAll( 
-        {where: 
-          { id: [...book_ids]}
-        })
+          { where: 
+            { id: [...book_ids],
+              [Op.or]: {
+                title: {[Op.like]: `${search_term}`},
+                author: {[Op.like]: `${search_term}`},
+                genre: {[Op.like]: `${search_term}`}
+              } // end Op.or
+          } // end where
+        }) //end findAndCountAll
       .then((books) => {
         if (offset > books.count) {
           console.log('Wrong page given in URL query, redirecting to page 1');
@@ -195,7 +211,9 @@ router.get(`${overdue_books_URL}`, function(req, res, next) {
           totalPages: Math.ceil(books.count / 10),
           currentPage: page,
           totalItems: books.count,
-          currentUrl: overdue_books_URL }
+          currentUrl: overdue_books_URL,
+          searchTerm: req.query.search_term
+         }
       )})
     })
   } // end else
