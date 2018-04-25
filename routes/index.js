@@ -99,6 +99,14 @@ router.post('/new_book.html', function(req, res, next) {
 /* GET all books page. */
 router.get(`${all_books_URL}`, function(req, res, next) {
 
+  let search_term = '%'; // by default, search for everything - % = wildcard for everything
+
+  if (req.query.search_term) {
+    // to make sure that the first page of the results loads
+    // and user is not redirected by the following conditionals
+    req.query.page = '1'; 
+    search_term = `%${req.query.search_term}%`; // include % at begin and end for partial matches
+  }
   // for pagination
   if (!req.query.page) {
     console.log('redirecting');
@@ -118,7 +126,17 @@ router.get(`${all_books_URL}`, function(req, res, next) {
         console.log('Wrong page given in URL query, redirecting to page 1');
         res.redirect(`${all_books_URL}?page=1`);
       }
-      Book.findAll( {offset: offset, limit: 10} )
+      Book.findAll( {
+          offset: offset, 
+          limit: 10,
+          where: {
+              [Op.or]: {
+                title: {[Op.like]: `${search_term}`},
+                author: {[Op.like]: `${search_term}`},
+                genre: {[Op.like]: `${search_term}`}
+              } // end Op.or
+            } // end where
+          }) //end query findAll
         .then((books) => {
           res.render('all_books', { 
               books: books, 
