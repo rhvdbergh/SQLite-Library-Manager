@@ -11,6 +11,8 @@ const all_books_URL = '/all_books.html';
 const overdue_books_URL = '/overdue_books.html';
 const checked_books_URL = '/checked_books.html';
 const all_patrons_URL = '/all_patrons.html';
+const all_loans_URL = '/all_loans.html';
+const checked_loans_URL = '/checked_loans.html';
 
 ////////////////////////////////
 //       HELPER METHODS       //
@@ -221,6 +223,7 @@ router.get(`${checked_books_URL}`, function(req, res, next) {
           title: 'Books Checked Out',
           totalPages: Math.ceil(books.count / 10),
           totalItems: books.count,
+          currentPage: page,
           currentUrl: checked_books_URL  
         }))
     })
@@ -624,31 +627,61 @@ router.post('/new_loan.html', function(req, res, next) {
 /* GET all loans page. */
 router.get('/all_loans.html', function(req, res, next) {
 
-  Loan.findAll({
-    include: [
-      {
-        model: Book
-      },
-      {
-        model: Patron
-      }
-    ]
-  })
-  .then((loans) => {
-    const formattedLoans = loans.map((loan) => {
-      return {
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
-      }
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect(`${all_loans_URL}?page=1`);
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect(`${all_loans_URL}?page=1`);
 
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    Loan.count()
+    .then((totalLoans) => {
+      if (offset > totalLoans) {// page query must be wrong!
+        console.log('Wrong page given in URL query, redirecting to page 1');
+        res.redirect(`${all_loans_URL}?page=1`);
+      }
+      Loan.findAll({
+        include: [
+          {
+            model: Book
+          },
+          {
+            model: Patron
+          }
+        ],
+        offset: offset,
+        limit: 10
+      })
+      .then((loans) => {
+        const formattedLoans = loans.map((loan) => {
+          return {
+            book_title: loan.dataValues.Book.dataValues.title,
+            patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+            book_id: loan.dataValues.book_id,
+            patron_id: loan.dataValues.patron_id,
+            loaned_on: formatDate(loan.dataValues.loaned_on),
+            return_by: formatDate(loan.dataValues.return_by),
+            returned_on: formatDate(loan.dataValues.returned_on)
+          }
+        });
+        res.render('all_loans', { 
+          loans: formattedLoans, 
+          title: 'Loans',
+          totalPages: Math.ceil(totalLoans / 10),
+          totalItems: totalLoans,
+          currentPage: page,
+          currentUrl: all_loans_URL 
+        }
+      );
+      });
     });
-    res.render('all_loans', { loans: formattedLoans, title: 'Loans' })
-  });
+  } // end else
 });
 
 /* GET overdue loans page. */
@@ -690,34 +723,59 @@ router.get('/overdue_loans.html', function(req, res, next) {
 });
 
 /* GET checked loans page. */
-router.get('/checked_loans.html', function(req, res, next) {
+router.get(`${checked_loans_URL}`, function(req, res, next) {
 
-  Loan.findAll( 
-    { where: 
-      { loaned_on: {[Op.not]: null}, // test for empty cell
-      returned_on: null}, 
-      include: [
-        {
-          model: Book
-        },
-        {
-          model: Patron
-        }
-    ]})
-  .then((loans) => {
-    const formattedLoans = loans.map((loan) => {
-      return {
-        book_title: loan.dataValues.Book.dataValues.title,
-        patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-        book_id: loan.dataValues.book_id,
-        patron_id: loan.dataValues.patron_id,
-        loaned_on: formatDate(loan.dataValues.loaned_on),
-        return_by: formatDate(loan.dataValues.return_by),
-        returned_on: formatDate(loan.dataValues.returned_on)
+  // for pagination
+  if (!req.query.page) {
+    console.log('redirecting');
+    res.redirect(`${checked_loans_URL}?page=1`);
+  } else if (!req.query.page.match(isNumber)) {
+    console.log('redirecting cause page NaN');
+    res.redirect(`${checked_loans_URL}?page=1`);
+
+  } else {
+
+    let page = req.query.page;
+    let offset = (page-1) * 10; // so 1-10 for page 1, 11-20 for page 2, etc.
+
+    Loan.findAndCountAll( 
+      { where: 
+        { loaned_on: {[Op.not]: null}, // test for empty cell
+        returned_on: null}, 
+        include: [
+          {
+            model: Book
+          },
+          {
+            model: Patron
+          }
+      ],
+      offset: offset,
+      limit: 10
       }
+    )
+    .then((loans) => {
+      const formattedLoans = loans.rows.map((loan) => {
+        return {
+          book_title: loan.dataValues.Book.dataValues.title,
+          patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
+          book_id: loan.dataValues.book_id,
+          patron_id: loan.dataValues.patron_id,
+          loaned_on: formatDate(loan.dataValues.loaned_on),
+          return_by: formatDate(loan.dataValues.return_by),
+          returned_on: formatDate(loan.dataValues.returned_on)
+        }
+      });
+      res.render('checked_loans', { 
+        loans: formattedLoans, 
+        title: 'Checked Out Books',
+        totalPages: Math.ceil(loans.count / 10),
+        totalItems: loans.count,
+        currentPage: page,
+        currentUrl: checked_loans_URL
+      })
     });
-    res.render('checked_loans', { loans: formattedLoans, title: 'Checked Out Books' })
-  });
+  } // end else
 });
 
 module.exports = router;
