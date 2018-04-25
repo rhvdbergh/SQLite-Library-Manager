@@ -39,7 +39,6 @@ function isValidDate(date) {
   if (month < 1) return false;
   if (month > 12) return false;
   if (day < 1) return false;
-  
 
   if (['01', '03', '05', '07', '08', '10', '12'].includes(month)) {
     if (day > 31) return false;
@@ -307,9 +306,9 @@ router.get('/book/:id', function(req, res, next) {
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
           book_id: loan.dataValues.book_id,
           patron_id: loan.dataValues.patron_id,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by),
-          returned_on: formatDate(loan.dataValues.returned_on)
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by,
+          returned_on: loan.dataValues.returned_on
         }
       });
       res.render('book_detail', { loans: formattedLoans, book: formattedLoans[0].book, title: formattedLoans[0].book.dataValues.title, button_message: 'Update' })
@@ -359,8 +358,8 @@ router.get('/return/:id', function(req, res, next) {
           today: formatDate(new Date()),
           book_title: loan.dataValues.Book.dataValues.title,
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by),
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by,
         }
       })
       return formattedLoans; // there should be only one, but if not, the first will be returned by [0]
@@ -395,8 +394,8 @@ router.post('/return/:id', function(req, res, next) {
           today: formatDate(new Date()),
           book_title: loan.dataValues.Book.dataValues.title,
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by)
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by
         }
       })
       return formattedLoans; // there should be only one, but if not, the first will be returned by [0]
@@ -523,9 +522,9 @@ router.get('/patron/:id', function(req, res, next) {
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
           book_id: loan.dataValues.book_id,
           patron_id: loan.dataValues.patron_id,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by),
-          returned_on: formatDate(loan.dataValues.returned_on)
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by,
+          returned_on: loan.dataValues.returned_on
           }
         });
         res.render('patron_detail', { loans: formattedLoans, patron: formattedLoans[0].patron, title: formattedLoans[0].patron_name, button_message: 'Update' })
@@ -736,9 +735,9 @@ router.get('/all_loans.html', function(req, res, next) {
             patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
             book_id: loan.dataValues.book_id,
             patron_id: loan.dataValues.patron_id,
-            loaned_on: formatDate(loan.dataValues.loaned_on),
-            return_by: formatDate(loan.dataValues.return_by),
-            returned_on: formatDate(loan.dataValues.returned_on)
+            loaned_on: loan.dataValues.loaned_on,
+            return_by: loan.dataValues.return_by,
+            returned_on: loan.dataValues.returned_on
           }
         });
         res.render('all_loans', { 
@@ -800,9 +799,9 @@ router.get(`${overdue_loans_URL}`, function(req, res, next) {
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
           book_id: loan.dataValues.book_id,
           patron_id: loan.dataValues.patron_id,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by),
-          returned_on: formatDate(loan.dataValues.returned_on)
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by,
+          returned_on: loan.dataValues.returned_on
         }
       });
       res.render('overdue_loans', { 
@@ -856,9 +855,9 @@ router.get(`${checked_loans_URL}`, function(req, res, next) {
           patron_name: `${loan.dataValues.Patron.dataValues.first_name} ${loan.dataValues.Patron.dataValues.last_name}`,
           book_id: loan.dataValues.book_id,
           patron_id: loan.dataValues.patron_id,
-          loaned_on: formatDate(loan.dataValues.loaned_on),
-          return_by: formatDate(loan.dataValues.return_by),
-          returned_on: formatDate(loan.dataValues.returned_on)
+          loaned_on: loan.dataValues.loaned_on,
+          return_by: loan.dataValues.return_by,
+          returned_on: loan.dataValues.returned_on
         }
       });
       res.render('checked_loans', { 
