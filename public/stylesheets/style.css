@@ -59,7 +59,9 @@ nav ul li {
     padding-left: 7px;
 }
 
-.paginationLinks ul li, .paginationLinks ul, .paginationLinks p {
+.paginationLinks ul li,
+.paginationLinks ul,
+.paginationLinks p {
     display: inline-block;
     list-style: none;
     padding-left: 10px;
@@ -131,4 +133,13 @@ select {
 
 .error {
     color: tomato;
+}
+
+#search_box {
+    display: block;
+    margin-left: 0;
+    font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 10px 14px 12px;
+    font-size: 14px;
+    border-radius: 2px;
 }
