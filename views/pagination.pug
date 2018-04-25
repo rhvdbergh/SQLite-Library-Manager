@@ -13,5 +13,8 @@ div.paginationLinks
           if searchTerm
             a(href=`${currentUrl}?page=${i}&search_term=${searchTerm}`)= i++   
           else
-            a(href=`${currentUrl}?page=${i}`)= i++   
-p #{title} in library database: #{totalItems}
+            a(href=`${currentUrl}?page=${i}`)= i++ 
+if searchTerm  
+  p #{totalItems} results for #{title} with search parameter '#{searchTerm}' in library database 
+else
+  p #{title} in library database: #{totalItems}
