@@ -417,7 +417,7 @@ router.post('/return/:id', function(req, res, next) {
       const returned_on = new Date(date.substring(0,4), date.substring(5, 7)-1, date.substring(8, 10));
       loan[0].updateAttributes({returned_on: returned_on });
     })
-    .then(() => res.redirect('/'));
+    .then(() => res.redirect(all_loans_URL));
   } 
 });
 
