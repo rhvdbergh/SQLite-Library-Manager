@@ -545,9 +545,14 @@ router.post('/patron/:id', function(req, res, next) {
 
   Patron.findById(req.params.id) 
   .then((patron) => {
-    patron.update(req.body);
-  })
-  .then(() => res.redirect(all_patrons_URL));
+    patron.update(req.body)
+    .then(() => res.redirect(all_patrons_URL))
+    .catch((error) => {
+      if (error.name === "SequelizeValidationError") {
+        res.render('new_patron', { patron: Patron.build(req.body), errors: error.errors, button_message: 'Update' });
+      } else { throw error; }
+    }).catch((error) => console.log('error', error));
+  });
 });
 
 ////////////////////////////////
