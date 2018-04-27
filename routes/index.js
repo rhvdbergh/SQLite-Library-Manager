@@ -328,7 +328,7 @@ router.post('/book/:id', function(req, res, next) {
   Book.findById(req.params.id) 
   .then((book) => {
     book.update(req.body)
-    .then(() => res.redirect('/'))
+    .then(() => res.redirect(all_books_URL))
     .catch((error) => {
       if (error.name === "SequelizeValidationError") {
         res.render('new_book', { book: Book.build(req.body), errors: error.errors, button_message: 'Update' });
@@ -491,7 +491,7 @@ router.post('/new_patron.html', function(req, res, next) {
   
   Patron.create(req.body)
   .then(() => {
-    res.redirect('all_patrons.html');
+    res.redirect(all_patrons_URL);
   })
   .catch((error) => {
     if (error.name === "SequelizeValidationError") {
@@ -547,7 +547,7 @@ router.post('/patron/:id', function(req, res, next) {
   .then((patron) => {
     patron.update(req.body);
   })
-  .then(() => res.redirect('/'));
+  .then(() => res.redirect(all_patrons_URL));
 });
 
 ////////////////////////////////
